@@ -1,7 +1,3 @@
-import Footer from "@/components/Footer";
-import Header from "@/components/Header";
-import Map from "@/components/Map";
-
 export default function About() {
   return (
     <>

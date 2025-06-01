@@ -102,7 +102,10 @@ export default function Home() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8 px-4 sm:px-6 lg:px-8">
           {ChooseOurGym.map((item, index) => (
-            <div key={index} className="text-center p-6  rounded-lg shadow-md">
+            <div
+              key={item.title + index}
+              className="text-center p-6  rounded-lg shadow-md"
+            >
               <div className="w-16 h-16  rounded-full flex items-center justify-center mx-auto mb-4">
                 {item.icon}
               </div>
@@ -195,7 +198,10 @@ export default function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {trainers.map((trainer, index) => (
-              <div className="bg-[#1a1919] rounded-2xl shadow-lg overflow-hidden">
+              <div
+                key={trainer.name + index}
+                className="bg-[#1a1919] rounded-2xl shadow-lg overflow-hidden"
+              >
                 <div className="h-64 bg-gray-300 flex items-center justify-center">
                   <Image
                     src={trainer.image}
