@@ -5,7 +5,7 @@ import Link from "next/link";
 import { IoIosCall } from "react-icons/io";
 import { RxHamburgerMenu } from "react-icons/rx";
 import { IoClose } from "react-icons/io5";
-import { menuItems } from "@/lib/utils/data";
+import { menuItems } from "@/lib/staticData/data";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
