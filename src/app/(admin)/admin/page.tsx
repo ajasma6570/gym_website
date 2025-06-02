@@ -1,16 +1,15 @@
+import { handleSignOut } from "@/app/actions/authActions";
+import { Button } from "@/components/ui/button";
+import { ModeToggle } from "@/components/ui/darkModeToggle";
+
 export default function AdminLoginPage() {
   return (
-    <div>
-      <h1>Admin Login</h1>
-      <form>
-        <label htmlFor="username">Username:</label>
-        <input type="text" id="username" name="username" />
-        <br />
-        <label htmlFor="password">Password:</label>
-        <input type="password" id="password" name="password" />
-        <br />
-        <button type="submit">Login</button>
-      </form>
+    <div className="min-h-screen flex flex-col justify-center items-center text-3xl space-y-2">
+      <p> Admin dashboard </p>
+      <div className="flex items-center gap-8">
+        <Button onClick={handleSignOut}>sign out</Button>
+        <ModeToggle />
+      </div>
     </div>
   );
 }

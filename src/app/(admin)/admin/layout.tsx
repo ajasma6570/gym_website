@@ -3,10 +3,5 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <section>
-      <nav>Admin Nav Bar</nav>
-      <main>{children}</main>
-    </section>
-  );
+  return <section>{children}</section>;
 }
