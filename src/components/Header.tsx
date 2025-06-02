@@ -29,8 +29,8 @@ const Header = () => {
     <header
       className={`fixed top-0 w-full z-50 transition-all duration-300 ${
         isScrolled
-          ? "bg-transparent backdrop-blur-md shadow-lg"
-          : "bg-transparent"
+          ? "md:bg-transparent md:backdrop-blur-md md:shadow-lg"
+          : "bg-none "
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -80,7 +80,7 @@ const Header = () => {
           <div className="md:hidden">
             <button
               onClick={toggleMenu}
-              className={`inline-flex items-center justify-center p-2 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-red-600 `}
+              className={`inline-flex items-center justify-center p-2 rounded-md transition-colors duration-200  `}
               aria-expanded="false"
             >
               <span className="sr-only">Open main menu</span>
@@ -89,11 +89,11 @@ const Header = () => {
                   isMenuOpen ? "hidden" : "block"
                 }`}
               />
-              <IoClose
+              {/* <IoClose
                 className={`h-7 w-7 text-red-600 ${
                   isMenuOpen ? "block" : "hidden"
                 }`}
-              />
+              /> */}
             </button>
           </div>
         </div>
@@ -125,9 +125,11 @@ const Header = () => {
               <span className="text-xl text-white font-bold">Logo</span>
               <button
                 onClick={() => setIsMenuOpen(false)}
-                className="p-2 rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-600"
+                className="p-2 rounded-md"
               >
-                <IoClose className={`h-6 w-6 text-white `} />
+                <IoClose
+                  className={`h-7 w-7 text-red-600 hover:text-red-700 `}
+                />
               </button>
             </div>
 
