@@ -24,7 +24,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-export default function userForm() {
+export default function UserForm() {
   const [isOpen, setIsOpen] = useState(false);
   const form = useForm<z.infer<typeof newUserSchema>>({
     resolver: zodResolver(newUserSchema),
