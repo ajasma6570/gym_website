@@ -1,14 +1,14 @@
 import React from "react";
-import UserTable from "@/components/admin/userTable";
-import UserForm from "@/components/admin/userForm";
+import UserPageClient from "@/components/Pages/UserPageClient";
 
-export default function page() {
-  return (
-    <>
-      <UserForm />
-      <div className="p-4 border-2 rounded-2xl">
-        <UserTable />
-      </div>
-    </>
-  );
+export async function generateMetadata() {
+  // You can fetch data or return static metadata
+  return {
+    title: "Gym - user Management",
+    description: "Manage users in the admin dashboard",
+  };
+}
+
+export default function Page() {
+  return <UserPageClient />;
 }

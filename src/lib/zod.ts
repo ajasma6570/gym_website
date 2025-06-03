@@ -22,7 +22,7 @@ export const newUserSchema = object({
     height: string({ required_error: "Height is required" })
         .min(1, "Height is required")
         .regex(/^\d+$/, "Height must be a number"),
-    joinDate: string({ required_error: "Joining date is required" })
+    joiningDate: string({ required_error: "Joining date is required" })
         .min(1, "Joining date is required")
         .regex(/^\d{4}-\d{2}-\d{2}$/, "Joining date must be in YYYY-MM-DD format"),
     phone: string({ required_error: "Phone number is required" })

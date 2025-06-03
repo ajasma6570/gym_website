@@ -10,3 +10,4 @@ export function generateSequentialId(lastId: number): number {
   lastId++;
   return lastId;
 }
+

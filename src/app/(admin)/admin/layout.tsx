@@ -15,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { handleSignOut } from "@/app/actions/authActions";
+import { Providers } from "@/components/admin/Providers";
 
 export default function AdminLayout({
   children,
@@ -52,7 +53,9 @@ export default function AdminLayout({
             </DropdownMenu>
           </div>
         </header>
-        <main className="flex flex-1 flex-col gap-4 p-4">{children}</main>
+        <Providers>
+          <main className="flex flex-1 flex-col gap-4 p-4">{children}</main>
+        </Providers>
       </SidebarInset>
     </SidebarProvider>
   );
