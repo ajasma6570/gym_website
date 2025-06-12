@@ -1,6 +1,6 @@
 "use client";
 
-import { LoginForm } from "@/components/admin/LoginForm";
+import { LoginForm } from "@/components/admin/Login/LoginForm";
 import { ModeToggle } from "@/components/ui/darkModeToggle";
 import Image from "next/image";
 

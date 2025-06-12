@@ -3,13 +3,13 @@
 import React from "react";
 import dynamic from "next/dynamic";
 import { useUSerList } from "@/hooks/useUserList";
-import UserTableShimmer from "../admin/UserTableShimmer";
+import UserTableShimmer from "../admin/User/UserTableShimmer";
 
-const UserForm = dynamic(() => import("@/components/admin/userForm"), {
+const UserForm = dynamic(() => import("@/components/admin/User/userForm"), {
   loading: () => <p>Loading form...</p>,
 });
 
-const UserTable = dynamic(() => import("@/components/admin/userTable"), {
+const UserTable = dynamic(() => import("@/components/admin/User/userTable"), {
   loading: () => <UserTableShimmer />,
 });
 

@@ -12,7 +12,7 @@ export async function POST(request: Request) {
       height,
       contactNo,
       payment,
-    },                                                                                              
+    },
   });
 
   return NextResponse.json(member, { status: 201 });

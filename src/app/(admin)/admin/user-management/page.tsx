@@ -1,5 +1,5 @@
 import React from "react";
-import UserPageClient from "@/components/Pages/UserPageClient";
+import UserPage from "@/components/Pages/UserPage";
 
 export async function generateMetadata() {
   // You can fetch data or return static metadata
@@ -10,5 +10,5 @@ export async function generateMetadata() {
 }
 
 export default function Page() {
-  return <UserPageClient />;
+  return <UserPage />;
 }

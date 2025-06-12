@@ -15,7 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { handleSignOut } from "@/app/actions/authActions";
-import { Providers } from "@/components/admin/Providers";
+import { Providers } from "@/components/admin/Provider/Providers";
 
 export default function AdminLayout({
   children,
