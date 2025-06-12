@@ -10,7 +10,7 @@ export async function handleCredentialsSignin(
     }
 ) {
     try {
-        await signIn("credentials", { username, password, redirectTo: '/admin' });
+        await signIn("credentials", { username, password, redirectTo: '/admin/dashboard' });
     } catch (error) {
         if (error instanceof AuthError) {
             switch (error.type) {
