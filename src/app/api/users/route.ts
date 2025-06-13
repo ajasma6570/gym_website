@@ -11,6 +11,7 @@ const users = [
         height: 175,
         joiningDate: "2023-01-15",
         phone: "123-456-7890",
+        planId: "1",
     },
     {
         id: "3u1reuv4",
@@ -21,6 +22,7 @@ const users = [
         height: 180,
         joiningDate: "2023-02-20",
         phone: "234-567-8901",
+        planId: "2",
     },
     {
         id: "derv1ws0",
@@ -31,6 +33,7 @@ const users = [
         height: 165,
         joiningDate: "2023-03-10",
         phone: "345-678-9012",
+        planId: "1",
     },
     {
         id: "5kma53ae",
@@ -41,6 +44,7 @@ const users = [
         height: 178,
         joiningDate: "2023-04-05",
         phone: "456-789-0123",
+        planId: "2",
     },
     {
         id: "bhqecj4p",
@@ -65,4 +69,24 @@ export async function POST(request: Request) {
     newUser.id = Math.random().toString(36).substring(2, 10);
     users.push(newUser);
     return NextResponse.json(newUser, { status: 201 });
+}
+
+export async function PUT(request: Request) {
+    const updatedUser = await request.json();
+    const index = users.findIndex(user => user.id === updatedUser.id);
+    if (index !== -1) {
+        users[index] = updatedUser;
+        return NextResponse.json(updatedUser);
+    }
+    return NextResponse.json({ error: 'User not found' }, { status: 404 });
+}
+
+export async function DELETE(request: Request) {
+    const { id } = await request.json();
+    const index = users.findIndex(user => user.id === id);
+    if (index !== -1) {
+        users.splice(index, 1);
+        return NextResponse.json({ message: 'User deleted successfully' });
+    }
+    return NextResponse.json({ error: 'User not found' }, { status: 404 });
 }

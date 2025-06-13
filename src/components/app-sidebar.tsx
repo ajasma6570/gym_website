@@ -26,9 +26,12 @@ const data = {
           url: "/admin/dashboard",
         },
         {
-          title: "Users",
+          title: "Users Management",
           url: "/admin/user-management",
-          isActive: true,
+        },
+        {
+          title: "Manage Plans",
+          url: "/admin/plan-management",
         },
       ],
     },
