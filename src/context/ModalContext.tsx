@@ -19,6 +19,18 @@ interface ModalContextType {
       userData: any;
     }>
   >;
+  deleteConfirmModal: {
+    isOpen: boolean;
+    userId: string | null;
+    userName: string | null;
+  };
+  setDeleteConfirmModal: React.Dispatch<
+    React.SetStateAction<{
+      isOpen: boolean;
+      userId: string | null;
+      userName: string | null;
+    }>
+  >;
 }
 
 const modalContext = createContext<ModalContextType>({
@@ -28,6 +40,12 @@ const modalContext = createContext<ModalContextType>({
     userData: null,
   },
   setUserFormModal: () => {},
+  deleteConfirmModal: {
+    isOpen: false,
+    userId: null as string | null,
+    userName: null as string | null,
+  },
+  setDeleteConfirmModal: () => {},
 });
 
 export const ModalProvider = ({ children }: ModalProviderProps) => {
@@ -36,8 +54,22 @@ export const ModalProvider = ({ children }: ModalProviderProps) => {
     mode: "create",
     userData: null,
   });
+
+  const [deleteConfirmModal, setDeleteConfirmModal] = useState({
+    isOpen: false,
+    userId: null as string | null,
+    userName: null as string | null,
+  });
+
   return (
-    <modalContext.Provider value={{ userFormModal, setUserFormModal }}>
+    <modalContext.Provider
+      value={{
+        userFormModal,
+        setUserFormModal,
+        deleteConfirmModal,
+        setDeleteConfirmModal,
+      }}
+    >
       {children}
     </modalContext.Provider>
   );

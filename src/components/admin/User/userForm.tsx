@@ -60,9 +60,18 @@ export default function UserForm() {
   const handleSubmit = useCallback(
     async (values: FormData) => {
       try {
+        console.log("Form values:", values);
+        console.log("Modal mode:", userFormModal.mode);
+        console.log("Modal userData:", userFormModal.userData);
+        
         if (userFormModal.mode === "edit") {
-          updateUser(values);
-          console.log("Updating user:", values);
+          // Ensure we have the id for updating
+          const updateData = {
+            ...values,
+            id: userFormModal.userData?.id || values.id
+          };
+          console.log("Update data with id:", updateData);
+          updateUser(updateData);
         } else {
           createUser(values);
           console.log("Creating user:", values);
@@ -71,7 +80,7 @@ export default function UserForm() {
         console.error("Form submission error:", error);
       }
     },
-    [createUser, updateUser, userFormModal.mode]
+    [createUser, updateUser, userFormModal.mode, userFormModal.userData]
   );
 
   const handleModalClose = useCallback(() => {

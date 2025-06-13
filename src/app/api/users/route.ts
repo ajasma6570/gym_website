@@ -55,6 +55,7 @@ const users = [
         height: 172,
         joiningDate: "2023-05-12",
         phone: "567-890-1234",
+        planId: "1",
     },
 ];
 
@@ -73,11 +74,18 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
     const updatedUser = await request.json();
+    console.log("PUT request received with data:", updatedUser);
+    
     const index = users.findIndex(user => user.id === updatedUser.id);
+    console.log("Found user at index:", index);
+    
     if (index !== -1) {
         users[index] = updatedUser;
+        console.log("User updated successfully:", users[index]);
         return NextResponse.json(updatedUser);
     }
+    
+    console.log("User not found with id:", updatedUser.id);
     return NextResponse.json({ error: 'User not found' }, { status: 404 });
 }
 

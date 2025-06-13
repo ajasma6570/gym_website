@@ -48,6 +48,7 @@ export const useUserUpdate = () => {
     const query = useQueryClient();
     return useMutation({
         mutationFn: async (updatedUser: z.infer<typeof newUserSchema>) => {
+            console.log("Updating user with data:", updatedUser);
             const response = await fetch("/api/users", {
                 method: "PUT",
                 headers: {
@@ -57,7 +58,9 @@ export const useUserUpdate = () => {
             });
 
             if (!response.ok) {
-                throw new Error("Failed to update user");
+                const errorData = await response.text();
+                console.error("API Error:", response.status, errorData);
+                throw new Error(`Failed to update user: ${response.status} ${errorData}`);
             }
 
             return response.json();

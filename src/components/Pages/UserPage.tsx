@@ -13,6 +13,10 @@ const UserTable = dynamic(() => import("@/components/admin/User/userTable"), {
   loading: () => <UserTableShimmer />,
 });
 
+const DeleteConfirmModal = dynamic(
+  () => import("@/components/admin/User/DeleteConfirmModal")
+);
+
 export default function Page() {
   const { data, isLoading } = useUserList();
   const { setUserFormModal } = useContext(modalContext);
@@ -32,6 +36,7 @@ export default function Page() {
         Add User
       </Button>
       <UserForm />
+      <DeleteConfirmModal />
       <div className="p-4 border-2 rounded-2xl">
         <UserTable data={data} />
       </div>

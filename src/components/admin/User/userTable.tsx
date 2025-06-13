@@ -35,7 +35,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import modalContext from "@/context/ModalContext";
-import { useUserDelete } from "@/hooks/useUserList";
 
 export type User = {
   id: string;
@@ -54,18 +53,17 @@ export default function Page({ data }: { data: User[] }) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
-  const { setUserFormModal } = useContext(modalContext);
-  const { mutate: deleteUser } = useUserDelete();
+  const { setUserFormModal, setDeleteConfirmModal } = useContext(modalContext);
 
   const handleDeleteUser = useCallback(
     (userId: string, userName: string) => {
-      if (
-        window.confirm(`Are you sure you want to delete user "${userName}"?`)
-      ) {
-        deleteUser(userId);
-      }
+      setDeleteConfirmModal({
+        isOpen: true,
+        userId,
+        userName,
+      });
     },
-    [deleteUser]
+    [setDeleteConfirmModal]
   );
 
   const columns: ColumnDef<User>[] = [
