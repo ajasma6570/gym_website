@@ -1,8 +1,8 @@
 "use client";
 import { generateSequentialId } from "@/lib/utils";
-import { newUserSchema } from "@/lib/zod";
+import { newMemberSchema } from "@/lib/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import React, { useEffect, useCallback, useContext, useMemo } from "react";
+import React, { useEffect, useCallback, useContext } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -32,8 +32,10 @@ import {
 import { useUserCreate, useUserUpdate } from "@/hooks/useUserList";
 import { usePlanList } from "@/hooks/usePlan";
 import modalContext from "@/context/ModalContext";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
-type FormData = z.infer<typeof newUserSchema>;
+type FormData = z.infer<typeof newMemberSchema>;
 
 export default function UserForm() {
   const {
@@ -53,8 +55,28 @@ export default function UserForm() {
   const isSuccess = isCreateSuccess || isUpdateSuccess;
 
   const form = useForm<FormData>({
-    resolver: zodResolver(newUserSchema),
+    resolver: zodResolver(newMemberSchema),
+    defaultValues: {
+      name: "",
+      gender: "male",
+      phone: "",
+      age: 0,
+      weight: 0,
+      height: 0,
+      joiningDate: "",
+      activePlan: "",
+      paymentStart: "",
+      dueDate: "",
+    },
   });
+
+  type Plan = {
+    id: string;
+    name: string;
+    duration: number; // in days
+    amount: string; // in paise
+    status: "active" | "inactive";
+  };
 
   // Memoize handlers to prevent unnecessary re-renders
   const handleSubmit = useCallback(
@@ -62,19 +84,31 @@ export default function UserForm() {
       try {
         console.log("Form values:", values);
         console.log("Modal mode:", userFormModal.mode);
-        console.log("Modal userData:", userFormModal.userData);
-        
+
+        // Convert string values to numbers for numeric fields
+        const formattedValues = {
+          ...values,
+          age: Number(values.age),
+          weight: Number(values.weight),
+          height: Number(values.height),
+        };
+
         if (userFormModal.mode === "edit") {
-          // Ensure we have the id for updating
+          // For edit mode, include the user ID
           const updateData = {
-            ...values,
-            id: userFormModal.userData?.id || values.id
+            ...formattedValues,
+            id: userFormModal.userData?.id,
           };
-          console.log("Update data with id:", updateData);
+          console.log("Update data:", updateData);
           updateUser(updateData);
         } else {
-          createUser(values);
-          console.log("Creating user:", values);
+          // For create mode, add generated ID
+          const createData = {
+            ...formattedValues,
+            id: generateSequentialId(1000).toString(),
+          };
+          console.log("Create data:", createData);
+          createUser(createData);
         }
       } catch (error) {
         console.error("Form submission error:", error);
@@ -82,6 +116,39 @@ export default function UserForm() {
     },
     [createUser, updateUser, userFormModal.mode, userFormModal.userData]
   );
+
+  // Function to calculate due date based on payment start and selected plan
+  const calculateDueDate = useCallback(
+    (paymentStartDate: string, planId: string) => {
+      if (!paymentStartDate || !planId || !plans.length) return "";
+
+      const selectedPlan = plans.find((plan: Plan) => plan.id === planId);
+      if (!selectedPlan) return "";
+
+      const startDate = new Date(paymentStartDate);
+      const dueDate = new Date(startDate);
+      dueDate.setDate(startDate.getDate() + selectedPlan.duration);
+
+      return dueDate.toISOString().split("T")[0];
+    },
+    [plans]
+  );
+
+  // Watch for changes in activePlan and paymentStart to auto-calculate dueDate
+  const watchedActivePlan = form.watch("activePlan");
+  const watchedPaymentStart = form.watch("paymentStart");
+
+  useEffect(() => {
+    if (watchedActivePlan && watchedPaymentStart) {
+      const newDueDate = calculateDueDate(
+        watchedPaymentStart,
+        watchedActivePlan
+      );
+      if (newDueDate) {
+        form.setValue("dueDate", newDueDate);
+      }
+    }
+  }, [watchedActivePlan, watchedPaymentStart, calculateDueDate, form]);
 
   const handleModalClose = useCallback(() => {
     setUserFormModal({
@@ -98,22 +165,40 @@ export default function UserForm() {
     if (!userFormModal.isOpen) return;
 
     if (userFormModal.mode === "edit" && userFormModal.userData) {
+      const data = userFormModal.userData;
+
       form.reset({
-        ...userFormModal.userData,
-        joiningDate:
-          userFormModal.userData.joiningDate?.split("T")[0] ??
-          new Date().toISOString().split("T")[0],
+        name: data.name || "",
+        gender: data.gender || "male",
+        phone: data.phone || "",
+        age: data.age || 0,
+        weight: data.weight || 0,
+        height: data.height || 0,
+        joiningDate: data.joiningDate
+          ? new Date(data.joiningDate).toISOString().split("T")[0]
+          : "",
+        activePlan: data.activePlan || data.planId || "", // Handle both field names
+        paymentStart: data.paymentStart
+          ? new Date(data.paymentStart).toISOString().split("T")[0]
+          : "",
+        dueDate: data.dueDate
+          ? new Date(data.dueDate).toISOString().split("T")[0]
+          : "",
       });
     } else {
+      const today = new Date().toISOString().split("T")[0];
+
       form.reset({
-        id: generateSequentialId(1000).toString(),
         name: "",
-        age: "" as any,
-        weight: "" as any,
-        height: "" as any,
-        joiningDate: new Date().toISOString().split("T")[0],
+        gender: "male",
         phone: "",
-        planId: "", // Add planId field
+        age: 0,
+        weight: 0,
+        height: 0,
+        joiningDate: today,
+        activePlan: "",
+        paymentStart: today,
+        dueDate: today,
       });
     }
   }, [userFormModal.isOpen, userFormModal.mode, userFormModal.userData, form]);
@@ -124,13 +209,13 @@ export default function UserForm() {
     }
   }, [isSuccess, handleModalClose]);
 
-  const dialogTitle = userFormModal.mode === "edit" ? "Edit User" : "New User";
-  const buttonText =
-    userFormModal.mode === "edit" ? "Update User" : "Create User";
+  const dialogTitle =
+    userFormModal.mode === "edit" ? "Edit Member" : "New Member";
+  const buttonText = userFormModal.mode === "edit" ? "Update" : "Create";
 
   return (
     <Dialog open={userFormModal.isOpen} onOpenChange={handleModalClose}>
-      <DialogContent className="sm:max-w-3xl max-h-[90vh] flex flex-col">
+      <DialogContent className="sm:max-w-4xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>{dialogTitle}</DialogTitle>
         </DialogHeader>
@@ -141,7 +226,7 @@ export default function UserForm() {
             className="flex flex-col flex-1 min-h-0"
           >
             <div className="flex-1 overflow-y-auto px-1 space-y-4">
-              <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-6 mt-2">
+              <div className="grid grid-cols-1 lg:grid-cols-3 items-center gap-6 mt-2">
                 <FormField
                   name="name"
                   control={form.control}
@@ -177,6 +262,37 @@ export default function UserForm() {
                     </FormItem>
                   )}
                 />
+
+                <FormField
+                  name="gender"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Gender</FormLabel>
+                      <FormControl>
+                        <RadioGroup
+                          value={field.value}
+                          onValueChange={field.onChange}
+                          className="flex"
+                        >
+                          <div className="flex items-center gap-3">
+                            <RadioGroupItem value="male" id="r1" />
+                            <Label htmlFor="r1">Male</Label>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <RadioGroupItem value="female" id="r2" />
+                            <Label htmlFor="r2">Female</Label>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <RadioGroupItem value="other" id="r3" />
+                            <Label htmlFor="r3">Other</Label>
+                          </div>
+                        </RadioGroup>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-3 items-center gap-6 mt-2">
                 <FormField
@@ -190,23 +306,36 @@ export default function UserForm() {
                           type="number"
                           placeholder="Enter your age"
                           {...field}
+                          value={field.value || ""}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value === "" ? 0 : Number(e.target.value)
+                            )
+                          }
                         />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
-                />{" "}
+                />
                 <FormField
                   name="weight"
                   control={form.control}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Weight</FormLabel>
+                      <FormLabel>Weight (kg)</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
-                          placeholder="Enter your weight (kg)"
+                          step="0.1"
+                          placeholder="Enter your weight"
                           {...field}
+                          value={field.value || ""}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value === "" ? 0 : Number(e.target.value)
+                            )
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -218,12 +347,18 @@ export default function UserForm() {
                   control={form.control}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Height</FormLabel>
+                      <FormLabel>Height (cm)</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
-                          placeholder="Enter your height (cm)"
+                          placeholder="Enter your height"
                           {...field}
+                          value={field.value || ""}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value === "" ? 0 : Number(e.target.value)
+                            )
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -252,14 +387,27 @@ export default function UserForm() {
                 />
 
                 <FormField
-                  name="planId"
+                  name="activePlan"
                   control={form.control}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Select Plan</FormLabel>
                       <FormControl>
                         <Select
-                          onValueChange={field.onChange}
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            // Auto-calculate due date if payment start is already set
+                            const paymentStart = form.getValues("paymentStart");
+                            if (paymentStart) {
+                              const newDueDate = calculateDueDate(
+                                paymentStart,
+                                value
+                              );
+                              if (newDueDate) {
+                                form.setValue("dueDate", newDueDate);
+                              }
+                            }
+                          }}
                           value={field.value}
                           disabled={plansLoading}
                         >
@@ -273,9 +421,10 @@ export default function UserForm() {
                             />
                           </SelectTrigger>
                           <SelectContent>
-                            {plans.map((plan: any) => (
+                            {plans.map((plan: Plan) => (
                               <SelectItem key={plan.id} value={plan.id}>
-                                {plan.name} - ₹{plan.amount} ({plan.days} days)
+                                {plan.name} - ₹{plan.amount} ({plan.duration}{" "}
+                                days)
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -285,10 +434,60 @@ export default function UserForm() {
                     </FormItem>
                   )}
                 />
+
+                <FormField
+                  name="paymentStart"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Payment Start Date</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="date"
+                          placeholder="Select payment start date"
+                          {...field}
+                          onChange={(e) => {
+                            field.onChange(e);
+                            // Auto-calculate due date if plan is already selected
+                            const activePlan = form.getValues("activePlan");
+                            if (activePlan && e.target.value) {
+                              const newDueDate = calculateDueDate(
+                                e.target.value,
+                                activePlan
+                              );
+                              if (newDueDate) {
+                                form.setValue("dueDate", newDueDate);
+                              }
+                            }
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  name="dueDate"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Due Date</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="date"
+                          placeholder="Select due date"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
             </div>
             <DialogFooter className="w-full flex !justify-center mt-6">
-              <Button type="submit" className="w-60 cursor-pointer">
+              <Button type="submit" className="w-32 cursor-pointer">
                 {buttonText}
               </Button>
             </DialogFooter>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useContext, useCallback } from "react";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -14,7 +14,7 @@ import {
   VisibilityState,
 } from "@tanstack/react-table";
 import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
-import MembershipPlanForm from "@/components/admin/Pricing/MembershipPlanForm";
+import modalContext from "@/context/ModalContext";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -39,121 +39,159 @@ import {
 export type Plan = {
   id: string;
   name: string;
-  days: number;
+  duration: number;
   amount: string;
   status: string;
 };
-
-export const columns: ColumnDef<Plan>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "name",
-    header: "Name",
-    cell: ({ row }) => <div className="capitalize">{row.getValue("name")}</div>,
-  },
-  {
-    accessorKey: "days",
-    header: ({ column }) => {
-      return (
-        <Button
-          className="!pl-0"
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Days
-          <ArrowUpDown />
-        </Button>
-      );
-    },
-    cell: ({ row }) => <div className="">{row.getValue("days")}</div>,
-  },
-  {
-    accessorKey: "amount",
-    header: ({ column }) => {
-      return (
-        <Button
-          className="!pl-0"
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Amount
-          <ArrowUpDown />
-        </Button>
-      );
-    },
-    cell: ({ row }) => <div className="">{row.getValue("amount")}</div>,
-  },
-  {
-    accessorKey: "status",
-    header: ({ column }) => {
-      return (
-        <Button
-          className="!pl-0"
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Status
-          <ArrowUpDown />
-        </Button>
-      );
-    },
-    cell: ({ row }) => <div className="">{row.getValue("status")}</div>,
-  },
-  {
-    id: "actions",
-    enableHiding: false,
-    cell: ({ row }) => {
-      const user = row.original;
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem onClick={() => alert(user.id)}>
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => alert(user.id)}>
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    },
-  },
-];
 
 export default function Page({ data }: { data: Plan[] }) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
+  const { setMembershipFormModal, setPlanDeleteConfirmModal } =
+    useContext(modalContext);
+
+  const handleDeletePlan = useCallback(
+    (planId: string, planName: string) => {
+      setPlanDeleteConfirmModal({
+        isOpen: true,
+        planId: planId,
+        planName: planName,
+      });
+    },
+    [setPlanDeleteConfirmModal]
+  );
+
+  const columns: ColumnDef<Plan>[] = [
+    {
+      id: "select",
+      header: ({ table }) => (
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && "indeterminate")
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
+    {
+      accessorKey: "name",
+      header: "Name",
+      cell: ({ row }) => (
+        <div className="capitalize">{row.getValue("name")}</div>
+      ),
+    },
+    {
+      accessorKey: "duration",
+      header: ({ column }) => {
+        return (
+          <Button
+            className="!pl-0"
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Duration
+            <ArrowUpDown />
+          </Button>
+        );
+      },
+      cell: ({ row }) => (
+        <div className="">{row.getValue("duration")} days</div>
+      ),
+    },
+    {
+      accessorKey: "amount",
+      header: ({ column }) => {
+        return (
+          <Button
+            className="!pl-0"
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Amount
+            <ArrowUpDown />
+          </Button>
+        );
+      },
+      cell: ({ row }) => <div className="">₹{row.getValue("amount")}</div>,
+    },
+    {
+      accessorKey: "status",
+      header: ({ column }) => {
+        return (
+          <Button
+            className="!pl-0"
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Status
+            <ArrowUpDown />
+          </Button>
+        );
+      },
+      cell: ({ row }) => (
+        <div
+          className={`capitalize ${
+            row.getValue("status") === "active"
+              ? "text-green-600 font-medium"
+              : "text-red-600 font-medium"
+          }`}
+        >
+          {row.getValue("status")}
+        </div>
+      ),
+    },
+    {
+      id: "actions",
+      enableHiding: false,
+      cell: ({ row }) => {
+        const plan = row.original;
+
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuItem
+                onClick={() =>
+                  setMembershipFormModal({
+                    isOpen: true,
+                    mode: "edit",
+                    membershipData: plan,
+                  })
+                }
+              >
+                Edit
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => handleDeletePlan(plan.id, plan.name)}
+                className="text-red-600 hover:text-red-700"
+              >
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      },
+    },
+  ];
 
   const table = useReactTable({
     data,

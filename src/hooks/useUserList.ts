@@ -1,5 +1,5 @@
 import { showToastMessage } from "@/lib/toast";
-import { newUserSchema } from "@/lib/zod";
+import { newMemberSchema, updateMemberSchema } from "@/lib/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 
@@ -18,7 +18,7 @@ export const useUserList = () => {
 export const useUserCreate = () => {
     const query = useQueryClient();
     return useMutation({
-        mutationFn: async (newUser: z.infer<typeof newUserSchema>) => {
+        mutationFn: async (newUser: z.infer<typeof newMemberSchema>) => {
             const response = await fetch("/api/users", {
                 method: "POST",
                 headers: {
@@ -47,7 +47,7 @@ export const useUserCreate = () => {
 export const useUserUpdate = () => {
     const query = useQueryClient();
     return useMutation({
-        mutationFn: async (updatedUser: z.infer<typeof newUserSchema>) => {
+        mutationFn: async (updatedUser: z.infer<typeof updateMemberSchema>) => {
             console.log("Updating user with data:", updatedUser);
             const response = await fetch("/api/users", {
                 method: "PUT",
@@ -102,5 +102,20 @@ export const useUserDelete = () => {
             console.error("Error deleting user:", error);
             showToastMessage("Failed to delete user", "error");
         },
+    });
+}
+
+export const useUserDetails = (userId: string) => {
+    return useQuery({
+        queryKey: ["users", userId],
+        queryFn: async () => {
+            const response = await fetch(`/api/users/${userId}`);
+            if (!response.ok) {
+                throw new Error("User not found");
+            }
+            return response.json();
+        },
+        refetchOnWindowFocus: false,
+        enabled: !!userId, // Only fetch if userId is provided
     });
 }

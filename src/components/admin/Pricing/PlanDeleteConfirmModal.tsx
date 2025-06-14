@@ -9,31 +9,31 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useUserDelete } from "@/hooks/useUserList";
+import { usePlanDelete } from "@/hooks/usePlan";
 import modalContext from "@/context/ModalContext";
 
-export default function DeleteConfirmModal() {
-  const { deleteConfirmModal, setDeleteConfirmModal } =
+export default function PlanDeleteConfirmModal() {
+  const { planDeleteConfirmModal, setPlanDeleteConfirmModal } =
     useContext(modalContext);
-  const { mutate: deleteUser, isPending } = useUserDelete();
+  const { mutate: deletePlan, isPending } = usePlanDelete();
 
   const handleConfirmDelete = () => {
-    if (deleteConfirmModal.userId) {
-      deleteUser(deleteConfirmModal.userId);
+    if (planDeleteConfirmModal.planId) {
+      deletePlan(planDeleteConfirmModal.planId);
       handleClose();
     }
   };
 
   const handleClose = () => {
-    setDeleteConfirmModal({
+    setPlanDeleteConfirmModal({
       isOpen: false,
-      userId: null,
-      userName: null,
+      planId: null,
+      planName: null,
     });
   };
 
   return (
-    <Dialog open={deleteConfirmModal.isOpen} onOpenChange={handleClose}>
+    <Dialog open={planDeleteConfirmModal.isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Confirm Delete</DialogTitle>
@@ -41,9 +41,9 @@ export default function DeleteConfirmModal() {
 
         <div className="py-4">
           <p className="text-sm ">
-            Are you sure you want to delete user{" "}
+            Are you sure you want to delete plan{" "}
             <span className="font-semibold ">
-              &quot;{deleteConfirmModal.userName} &quot;
+              &quot;{planDeleteConfirmModal.planName}&quot;
             </span>
             ?
           </p>

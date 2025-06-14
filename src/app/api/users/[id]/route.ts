@@ -1,6 +1,4 @@
-// app/api/users/route.ts
-import { NextResponse } from 'next/server';
-
+import { NextRequest, NextResponse } from "next/server";
 const users = [
     {
         id: "user001",
@@ -83,43 +81,14 @@ const users = [
         updatedAt: new Date("2024-05-26T12:15:00"),
     },
 ];
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
 
+    const user = users.find((u) => u.id === id);
 
-export async function GET() {
-    return NextResponse.json(users);
-}
-
-
-export async function POST(request: Request) {
-    const newUser = await request.json();
-    newUser.id = Math.random().toString(36).substring(2, 10);
-    users.push(newUser);
-    return NextResponse.json(newUser, { status: 201 });
-}
-
-export async function PUT(request: Request) {
-    const updatedUser = await request.json();
-    console.log("PUT request received with data:", updatedUser);
-
-    const index = users.findIndex(user => user.id === updatedUser.id);
-    console.log("Found user at index:", index);
-
-    if (index !== -1) {
-        users[index] = updatedUser;
-        console.log("User updated successfully:", users[index]);
-        return NextResponse.json(updatedUser);
+    if (!user) {
+        return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    console.log("User not found with id:", updatedUser.id);
-    return NextResponse.json({ error: 'User not found' }, { status: 404 });
-}
-
-export async function DELETE(request: Request) {
-    const { id } = await request.json();
-    const index = users.findIndex(user => user.id === id);
-    if (index !== -1) {
-        users.splice(index, 1);
-        return NextResponse.json({ message: 'User deleted successfully' });
-    }
-    return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    return NextResponse.json(user);
 }

@@ -3,9 +3,9 @@
 import React, { useContext } from "react";
 import dynamic from "next/dynamic";
 import { useUserList } from "@/hooks/useUserList";
-import UserTableShimmer from "../admin/User/UserTableShimmer";
-import { Button } from "../ui/button";
+import UserTableShimmer from "@/components/admin/User/UserTableShimmer";
 import modalContext from "@/context/ModalContext";
+import { Button } from "@/components/ui/button";
 
 const UserForm = dynamic(() => import("@/components/admin/User/userForm"));
 
@@ -28,12 +28,12 @@ export default function Page() {
   return (
     <>
       <Button
-        className="w-60 cursor-pointer"
+        className="w-36 cursor-pointer"
         onClick={() =>
           setUserFormModal({ isOpen: true, mode: "create", userData: null })
         }
       >
-        Add User
+        Add Member
       </Button>
       <UserForm />
       <DeleteConfirmModal />
