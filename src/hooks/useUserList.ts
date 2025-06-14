@@ -7,7 +7,7 @@ export const useUSerList = () => {
     return useQuery({
         queryKey: ["users"],
         queryFn: async () => {
-            const response = await fetch("/api/users");
+            const response = await fetch("/api/member");
             return response.json();
         },
         refetchOnWindowFocus: false,
@@ -19,7 +19,7 @@ export const useUserListMutate = () => {
     const query = useQueryClient();
     return useMutation({
         mutationFn: async (newUser: z.infer<typeof newUserSchema>) => {
-            await fetch("/api/users", {
+            await fetch("/api/member", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

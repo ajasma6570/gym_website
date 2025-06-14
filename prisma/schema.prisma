@@ -1,3 +1,4 @@
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,13 +9,31 @@ datasource db {
 }
 
 model Member {
-  id          String   @id @default(uuid())
-  name        String
-  age         Int
-  weight      Float
-  height      Float
-  joiningDate DateTime @default(now())
-  contactNo   String
-  payment     Float    // stores payment amount
+  id            String     @id @default(uuid())
+  name          String
+  age           Int
+  weight        Float
+  height        Float
+  joiningDate   DateTime  @default(now())
+  contactNo     String
+  paymentStatus Boolean   @default(false)
+  planId        String?
+  plan          Plan?       @relation(fields: [planId], references: [id])
+  payments      Payment[]
 }
 
+model Plan {
+  id        String   @id @default(uuid())
+  name      String
+  duration  Int       // in days
+  price     Float
+  members   Member[]
+}
+
+model Payment {
+  id        String    @id @default(uuid())
+  memberId  String
+  amount    Float
+  date      DateTime  @default(now())
+  member    Member    @relation(fields: [memberId], references: [id])
+}
