@@ -1,3 +1,5 @@
+"use client";
+
 import { AppSidebar } from "@/components/app-sidebar";
 import {
   SidebarInset,
@@ -15,7 +17,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { handleSignOut } from "@/app/actions/authActions";
-import { Providers } from "@/components/admin/Providers";
+import { QueryProviders } from "@/components/admin/Provider/Providers";
+import { ModalProvider } from "../../../context/ModalContext";
 
 export default function AdminLayout({
   children,
@@ -53,9 +56,11 @@ export default function AdminLayout({
             </DropdownMenu>
           </div>
         </header>
-        <Providers>
-          <main className="flex flex-1 flex-col gap-4 p-4">{children}</main>
-        </Providers>
+        <QueryProviders>
+          <ModalProvider>
+            <main className="flex flex-1 flex-col gap-4 p-4">{children}</main>
+          </ModalProvider>
+        </QueryProviders>
       </SidebarInset>
     </SidebarProvider>
   );

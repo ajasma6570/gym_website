@@ -1,23 +1,57 @@
 // app/api/member/route.ts
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { getStatusFromPlanDuration } from "@/lib/calculateStatus";
 
 
 export async function POST(req: Request) {
-  const { name, age, weight, height, contactNo, planId, initialPayment } = await req.json();
+  const {
+    name,
+    gender,
+    phone,
+    age,
+    height,
+    weight,
+    joiningDate,
+    activePlan,
+    paymentStart,
+    dueDate,
+    createdAt,
+    updatedAt,
+    initialPayment,
+  } = await req.json();
+
+  const planId = parseInt(activePlan);
+
+  if (isNaN(planId)) {
+    return NextResponse.json({ error: "Invalid plan ID" }, { status: 400 });
+  }
 
   const plan = await prisma.plan.findUnique({ where: { id: planId } });
-  if (!plan) return NextResponse.json({ error: "Plan not found" }, { status: 400 });
+  if (!plan) {
+    return NextResponse.json({ error: "Plan not found" }, { status: 400 });
+  }
+
+  const paymentStartDate = paymentStart ? new Date(paymentStart) : new Date();
+
+  const { isActive, expiryDate } = getStatusFromPlanDuration(paymentStartDate, plan.duration);
 
   const member = await prisma.member.create({
     data: {
       name,
+      gender,
+      phone,
       age,
-      weight,
       height,
-      contactNo,
+      weight,
+      joiningDate: new Date(joiningDate),
+      status: isActive,
+      activePlan,
+      paymentStart: paymentStartDate,
+      dueDate: dueDate ? new Date(dueDate) : undefined,
+      createdAt: createdAt ? new Date(createdAt) : undefined,
+      updatedAt: updatedAt ? new Date(updatedAt) : undefined,
       planId,
-      paymentStatus: !!initialPayment,
       payments: initialPayment
         ? {
             create: {
@@ -31,50 +65,22 @@ export async function POST(req: Request) {
   return NextResponse.json(member, { status: 201 });
 }
 
+
+
+
+
 export async function GET() {
   try {
     const members = await prisma.member.findMany({
-      include: { plan: true, payments: true },
+      include: {
+        plan: true,
+        payments: true,
+      },
     });
 
-    const today = new Date();
-
-    const withStatus = members.map((m) => {
-      const expiryDate = new Date(m.joiningDate);
-      expiryDate.setDate(expiryDate.getDate() + m.plan.duration);
-
-      const daysLeft = Math.ceil((expiryDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-      const daysSinceExpiry = -daysLeft; // if expired, daysLeft will be negative
-
-      let statusLabel = "Active";
-      let color = "green";
-
-      if (daysLeft === 0) {
-        statusLabel = "Expires Today";
-        color = "orange";
-      } else if (daysLeft < 0 && daysSinceExpiry <= 5) {
-        statusLabel = "Payment Pending - 5 Days";
-        color = "orange";
-      } else if (daysSinceExpiry > 5 && daysSinceExpiry <= 10) {
-        statusLabel = "Follow-up Needed - 10 Days";
-        color = "orange";
-      } else if (daysSinceExpiry > 10) {
-        statusLabel = "Critical - No Payment";
-        color = "red";
-      }
-
-      return {
-        ...m,
-        expiryDate,
-        daysLeft,
-        statusLabel,
-        color,
-      };
-    });
-
-    return NextResponse.json(withStatus);
+    return NextResponse.json(members);
   } catch (error) {
-    console.error(error);
+    console.error("Error fetching members:", error);
     return NextResponse.json({ error: "Failed to fetch members" }, { status: 500 });
   }
 }

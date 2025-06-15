@@ -9,31 +9,40 @@ datasource db {
 }
 
 model Member {
-  id            String     @id @default(uuid())
+  id            Int        @id @default(autoincrement()) // ✅ Changed to Int
   name          String
+  gender        String
+  phone         String
   age           Int
-  weight        Float
   height        Float
-  joiningDate   DateTime  @default(now())
-  contactNo     String
-  paymentStatus Boolean   @default(false)
-  planId        String?
+  weight        Float
+  joiningDate   DateTime   @default(now())
+  
+  activePlan    String?
+  status        Boolean  @default(false)
+  paymentStart  DateTime?
+  dueDate       DateTime?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  planId        Int?                                       // ✅ Changed to Int
   plan          Plan?       @relation(fields: [planId], references: [id])
   payments      Payment[]
 }
 
 model Plan {
-  id        String   @id @default(uuid())
-  name      String
-  duration  Int       // in days
-  price     Float
-  members   Member[]
+  id       Int      @id @default(autoincrement())          // ✅ Changed to Int
+  name     String
+  duration Int      // in days
+  amount   Int
+  members  Member[]
+  status   String
 }
 
 model Payment {
-  id        String    @id @default(uuid())
-  memberId  String
+  id        Int      @id @default(autoincrement())         // ✅ Changed to Int
+  memberId  Int                                        // ✅ Changed to Int
   amount    Float
-  date      DateTime  @default(now())
-  member    Member    @relation(fields: [memberId], references: [id])
+  date      DateTime @default(now())
+  member    Member   @relation(fields: [memberId], references: [id])
 }

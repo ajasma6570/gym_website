@@ -15,10 +15,10 @@ export async function GET() {
 // POST: Create a new plan
 export async function POST(request: Request) {
   try {
-    const { name, duration, price } = await request.json();
+    const { name, duration, amount, status } = await request.json();
 
     const plan = await prisma.plan.create({
-      data: { name, duration, price },
+      data: { name, duration, amount, status },
     });
 
     return NextResponse.json(plan, { status: 201 });

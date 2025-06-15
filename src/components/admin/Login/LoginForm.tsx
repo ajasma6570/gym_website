@@ -17,7 +17,7 @@ import { z } from "zod";
 import { signInSchema } from "@/lib/zod";
 import { handleCredentialsSignin } from "@/app/actions/authActions";
 import { useState } from "react";
-import ErrorMessage from "./error-message";
+import ErrorMessage from "../error-message";
 import { Loader2Icon } from "lucide-react";
 
 export function LoginForm({

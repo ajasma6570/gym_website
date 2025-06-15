@@ -26,9 +26,12 @@ const data = {
           url: "/admin/dashboard",
         },
         {
-          title: "Users",
-          url: "/admin/user-management",
-          isActive: true,
+          title: "Members",
+          url: "/admin/members",
+        },
+        {
+          title: "Membership",
+          url: "/admin/membership",
         },
       ],
     },
@@ -52,7 +55,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     <SidebarMenuButton
                       className="!py-6"
                       asChild
-                      isActive={pathname.startsWith(item.url)}
+                      isActive={
+                        pathname === item.url ||
+                        pathname.startsWith(`${item.url}/`)
+                      }
                     >
                       <Link href={item.url}>{item.title}</Link>
                     </SidebarMenuButton>

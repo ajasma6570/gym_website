@@ -1,9 +1,4 @@
-export async function generateMetadata() {
-  return {
-    title: "Gym - Dashboard",
-    description: "Admin dashboard for managing gym operations",
-  };
-}
+"use client";
 
 export default function Page() {
   return <h1>Dashboard</h1>;

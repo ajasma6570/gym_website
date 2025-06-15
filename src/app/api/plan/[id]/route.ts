@@ -24,12 +24,12 @@ export async function GET(req: NextRequest, context: Context) {
 
 export async function PUT(req: NextRequest, context: Context) {
   const id = context.params.id;
-  const { name, duration, price } = await req.json();
+  const { name, duration, amount, status } = await req.json();
 
   try {
     const updatedPlan = await prisma.plan.update({
       where: { id },
-      data: { name, duration, price },
+      data: { name, duration, amount,status },
     });
     return NextResponse.json(updatedPlan);
   } catch (error) {
