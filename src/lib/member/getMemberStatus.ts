@@ -1,5 +1,3 @@
-// lib/calculateStatus.ts
-
 export function getStatusFromPlanDuration(
   paymentStart: string | Date,
   duration: number

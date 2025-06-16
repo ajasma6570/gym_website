@@ -47,9 +47,9 @@ export const useUserCreate = () => {
 export const useUserUpdate = () => {
     const query = useQueryClient();
     return useMutation({
-        mutationFn: async (updatedUser: z.infer<typeof updateMemberSchema>) => {
+        mutationFn: async (updatedUser: z.infer<typeof updateMemberSchema> & { id: number }) => {
             console.log("Updating user with data:", updatedUser);
-            const response = await fetch("/api/member", {
+            const response = await fetch(`/api/member/${updatedUser.id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -74,13 +74,13 @@ export const useUserUpdate = () => {
             showToastMessage("Failed to update user", "error");
         },
     });
-}
+};
 
 export const useUserDelete = () => {
     const query = useQueryClient();
     return useMutation({
         mutationFn: async (userId: string) => {
-            const response = await fetch("/api/member", {
+            const response = await fetch(`/api/member/${userId}`, {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",

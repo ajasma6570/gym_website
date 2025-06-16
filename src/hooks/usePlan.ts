@@ -48,7 +48,8 @@ export const usePlanUpdate = () => {
     const query = useQueryClient();
     return useMutation({
         mutationFn: async (updatedPlan: z.infer<typeof newMembershipSchema>) => {
-            const response = await fetch("/api/plans", {
+            console.log("updated palllllllllllll",updatedPlan)
+            const response = await fetch("/api/plan", {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",

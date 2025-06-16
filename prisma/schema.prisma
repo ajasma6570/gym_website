@@ -9,7 +9,7 @@ datasource db {
 }
 
 model Member {
-  id            Int        @id @default(autoincrement()) // ✅ Changed to Int
+  id            Int        @id @default(autoincrement()) 
   name          String
   gender        String
   phone         String
@@ -25,13 +25,18 @@ model Member {
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
 
-  planId        Int?                                       // ✅ Changed to Int
+  planId        Int?                                       
   plan          Plan?       @relation(fields: [planId], references: [id])
   payments      Payment[]
+  isDeleted     Boolean   @default(false)
+  deletedAt     DateTime? 
+  @@unique([name, phone]) 
+
+
 }
 
 model Plan {
-  id       Int      @id @default(autoincrement())          // ✅ Changed to Int
+  id       Int      @id @default(autoincrement())          
   name     String
   duration Int      // in days
   amount   Int
@@ -40,9 +45,20 @@ model Plan {
 }
 
 model Payment {
-  id        Int      @id @default(autoincrement())         // ✅ Changed to Int
-  memberId  Int                                        // ✅ Changed to Int
+  id        Int      @id @default(autoincrement())        
+  memberId  Int                                        
   amount    Float
   date      DateTime @default(now())
   member    Member   @relation(fields: [memberId], references: [id])
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
 }
+
+model Task {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  completed   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
