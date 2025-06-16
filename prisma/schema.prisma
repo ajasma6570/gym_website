@@ -1,3 +1,4 @@
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,13 +9,56 @@ datasource db {
 }
 
 model Member {
-  id          String   @id @default(uuid())
-  name        String
-  age         Int
-  weight      Float
-  height      Float
-  joiningDate DateTime @default(now())
-  contactNo   String
-  payment     Float    // stores payment amount
+  id            Int        @id @default(autoincrement()) 
+  name          String
+  gender        String
+  phone         String
+  age           Int
+  height        Float
+  weight        Float
+  joiningDate   DateTime   @default(now())
+  
+  activePlan    String?
+  status        Boolean  @default(false)
+  paymentStart  DateTime?
+  dueDate       DateTime?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  planId        Int?                                       
+  plan          Plan?       @relation(fields: [planId], references: [id])
+  payments      Payment[]
+  isDeleted     Boolean   @default(false)
+  deletedAt     DateTime? 
+  @@unique([name, phone]) 
+
+
+}
+
+model Plan {
+  id       Int      @id @default(autoincrement())          
+  name     String
+  duration Int      // in days
+  amount   Int
+  members  Member[]
+  status   String
+}
+
+model Payment {
+  id        Int      @id @default(autoincrement())        
+  memberId  Int                                        
+  amount    Float
+  date      DateTime @default(now())
+  member    Member   @relation(fields: [memberId], references: [id])
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+}
+
+model Task {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  completed   Boolean  @default(false)
+  createdAt   DateTime @default(now())
 }
 

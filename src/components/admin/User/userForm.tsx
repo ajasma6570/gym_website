@@ -50,6 +50,8 @@ export default function UserForm() {
   } = useUserUpdate();
   const { userFormModal, setUserFormModal } = useContext(modalContext);
   const { data: plans = [], isLoading: plansLoading } = usePlanList();
+  console.log("planssssss",plans);
+ 
 
   // Check if either create or update was successful
   const isSuccess = isCreateSuccess || isUpdateSuccess;
@@ -422,7 +424,7 @@ export default function UserForm() {
                           </SelectTrigger>
                           <SelectContent>
                             {plans.map((plan: Plan) => (
-                              <SelectItem key={plan.id} value={plan.id}>
+                              <SelectItem key={plan.id} value={String(plan.id)}>
                                 {plan.name} - ₹{plan.amount} ({plan.duration}{" "}
                                 days)
                               </SelectItem>

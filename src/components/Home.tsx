@@ -37,21 +37,21 @@ const trainers = [
   {
     name: "John Smith",
     title: "Strength & Conditioning",
-    image: "/assets/image1.jpg",
+    image: "/assets/eq_1.jpeg",
     description:
       "Certified personal trainer with 8+ years of experience in strength training and muscle building.",
   },
   {
     name: "Sarah Johnson",
     title: "Yoga & Flexibility",
-    image: "/assets/image2.jpg",
+    image: "/assets/eq_2.jpeg",
     description:
       "Yoga instructor specializing in flexibility, mindfulness, and holistic wellness approaches.",
   },
   {
     name: "Mike Davis",
     title: "CrossFit & HIIT",
-    image: "/assets/image4.jpg",
+    image: "/assets/eq_3.jpeg",
     description:
       "High-intensity training expert focused on functional fitness and athletic performance.",
   },
@@ -120,7 +120,7 @@ export default function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full w-full">
           <div className="h-full w-full flex items-center justify-center">
             <Image
-              src="/assets/image4.jpg"
+              src="/assets/anatomy.jpeg"
               alt="Cross Training Rope Swing Exercise"
               width={520}
               height={600}

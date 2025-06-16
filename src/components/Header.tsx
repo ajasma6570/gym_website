@@ -6,6 +6,8 @@ import { IoIosCall } from "react-icons/io";
 import { RxHamburgerMenu } from "react-icons/rx";
 import { IoClose } from "react-icons/io5";
 import { menuItems } from "@/lib/staticData/data";
+import Image from "next/image";
+
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -27,25 +29,30 @@ const Header = () => {
 
   return (
     <header
-      className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-        isScrolled
+      className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled
           ? "md:bg-transparent md:backdrop-blur-md md:shadow-lg"
           : "bg-none "
-      }`}
+        }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo/Icon - Left Side */}
           <div className="flex-shrink-0">
-            <Link href="/" className="flex items-center">
-              <span
-                className={`ml-2 text-2xl font-bold transition-colors duration-300 ${
-                  isScrolled ? "text-white" : "text-white"
-                }`}
+            <Link href="/" className="flex items-center space-x-2">
+              <Image
+                src="/assets/logo_anatomy1.png" 
+                alt="Logo"
+                width={100}       
+                height={80}
+              />
+              {/* /<span
+                className={`text-2xl font-bold transition-colors duration-300 ${isScrolled ? "text-white" : "text-white"
+                  }`}
               >
-                Logo
-              </span>
+                Anatomy */}
+              {/* </span> */}
             </Link>
+
           </div>
 
           {/* Desktop Navigation - Center */}
@@ -65,11 +72,10 @@ const Header = () => {
           <div className="hidden md:flex items-center">
             <a
               href="tel:+1234567890"
-              className={`flex items-center px-4 py-2 rounded-md transition-colors duration-200 ${
-                isScrolled
+              className={`flex items-center px-4 py-2 rounded-md transition-colors duration-200 ${isScrolled
                   ? "bg-red-600 hover:bg-red-700 text-white"
                   : "bg-red-600 hover:bg-red-700 text-white"
-              }`}
+                }`}
             >
               <IoIosCall className="h-5 w-5 mr-1.5" />
               <span className="text-sm font-medium">Call Now</span>
@@ -85,9 +91,8 @@ const Header = () => {
             >
               <span className="sr-only">Open main menu</span>
               <RxHamburgerMenu
-                className={`h-7 w-7 text-red-600 ${
-                  isMenuOpen ? "hidden" : "block"
-                }`}
+                className={`h-7 w-7 text-red-600 ${isMenuOpen ? "hidden" : "block"
+                  }`}
               />
               {/* <IoClose
                 className={`h-7 w-7 text-red-600 ${
@@ -101,11 +106,10 @@ const Header = () => {
 
       {/* Mobile menu overlay */}
       <div
-        className={`md:hidden fixed inset-0 top-0 z-40 transition-opacity duration-300 ${
-          isMenuOpen
+        className={`md:hidden fixed inset-0 top-0 z-40 transition-opacity duration-300 ${isMenuOpen
             ? "opacity-100 pointer-events-auto"
             : "opacity-0 pointer-events-none"
-        }`}
+          }`}
       >
         {/* Backdrop */}
         <div
@@ -115,9 +119,8 @@ const Header = () => {
 
         {/* Slide menu */}
         <div
-          className={`absolute left-0 top-0 h-full w-64 max-w-xs transform transition-transform duration-300 ease-in-out ${
-            isMenuOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
+          className={`absolute left-0 top-0 h-full w-64 max-w-xs transform transition-transform duration-300 ease-in-out ${isMenuOpen ? "translate-x-0" : "-translate-x-full"
+            }`}
         >
           <div className="h-full bg-black shadow-xl">
             {/* Menu header */}
@@ -139,11 +142,10 @@ const Header = () => {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`block px-6 py-4 text-white  hover:bg-red-600 hover:text-white transition-all duration-200 transform ${
-                    isMenuOpen
+                  className={`block px-6 py-4 text-white  hover:bg-red-600 hover:text-white transition-all duration-200 transform ${isMenuOpen
                       ? "translate-x-0 opacity-100"
                       : "-translate-x-4 opacity-0"
-                  }`}
+                    }`}
                   style={{
                     transitionDelay: isMenuOpen ? `${index * 50}ms` : "0ms",
                   }}
@@ -157,11 +159,10 @@ const Header = () => {
               <div className="px-6 py-4">
                 <a
                   href="tel:+1234567890"
-                  className={`flex items-center justify-center w-full px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-md transition-all duration-200 transform ${
-                    isMenuOpen
+                  className={`flex items-center justify-center w-full px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-md transition-all duration-200 transform ${isMenuOpen
                       ? "translate-x-0 opacity-100"
                       : "-translate-x-4 opacity-0"
-                  }`}
+                    }`}
                   style={{
                     transitionDelay: isMenuOpen
                       ? `${menuItems.length * 50}ms`

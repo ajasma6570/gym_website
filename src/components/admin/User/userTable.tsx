@@ -143,7 +143,14 @@ export default function Page({ data }: { data: User[] }) {
         );
       },
       cell: ({ row }) => {
-        const status = row.getValue("status") as string;
+        const rawStatus = row.getValue("status");
+        const status =
+          typeof rawStatus === "boolean"
+            ? rawStatus
+              ? "active"
+              : "inactive"
+            : String(rawStatus).toLowerCase();
+
 
         const getColor = () => {
           switch (status.toLowerCase()) {
@@ -331,9 +338,9 @@ export default function Page({ data }: { data: User[] }) {
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
                     </TableHead>
                   );
                 })}
