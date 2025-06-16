@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getStatusFromPlanDuration } from "@/lib/calculateStatus";
+import { getStatusFromPlanDuration } from "@/lib/member/getMemberStatus";
 
 interface RouteParams {
   params: { id: string };
