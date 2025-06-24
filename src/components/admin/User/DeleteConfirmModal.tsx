@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useContext } from "react";
+import React, { useContext, useCallback, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -9,28 +9,34 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Loader2Icon } from "lucide-react";
 import { useUserDelete } from "@/hooks/useUserList";
 import modalContext from "@/context/ModalContext";
 
 export default function DeleteConfirmModal() {
   const { deleteConfirmModal, setDeleteConfirmModal } =
     useContext(modalContext);
-  const { mutate: deleteUser, isPending } = useUserDelete();
+  const { mutate: deleteUser, isPending, isSuccess } = useUserDelete();
 
   const handleConfirmDelete = () => {
     if (deleteConfirmModal.userId) {
       deleteUser(deleteConfirmModal.userId);
-      handleClose();
     }
   };
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setDeleteConfirmModal({
       isOpen: false,
       userId: null,
       userName: null,
     });
-  };
+  }, [setDeleteConfirmModal]);
+
+  useEffect(() => {
+    if (isSuccess) {
+      handleClose();
+    }
+  }, [isSuccess, handleClose]);
 
   return (
     <Dialog open={deleteConfirmModal.isOpen} onOpenChange={handleClose}>
@@ -58,7 +64,14 @@ export default function DeleteConfirmModal() {
             onClick={handleConfirmDelete}
             disabled={isPending}
           >
-            {isPending ? "Deleting..." : "Delete"}
+            {isPending ? (
+              <>
+                <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+                Deleting...
+              </>
+            ) : (
+              "Delete"
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

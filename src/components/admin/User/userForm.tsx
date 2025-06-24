@@ -6,6 +6,7 @@ import React, { useEffect, useCallback, useContext } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
+import { Loader2Icon } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -41,20 +42,21 @@ export default function UserForm() {
   const {
     mutate: createUser,
     isSuccess: isCreateSuccess,
+    isPending: isCreatePending,
     reset: resetCreate,
   } = useUserCreate();
   const {
     mutate: updateUser,
     isSuccess: isUpdateSuccess,
+    isPending: isUpdatePending,
     reset: resetUpdate,
   } = useUserUpdate();
   const { userFormModal, setUserFormModal } = useContext(modalContext);
   const { data: plans = [], isLoading: plansLoading } = usePlanList();
-  console.log("planssssss",plans);
- 
 
   // Check if either create or update was successful
   const isSuccess = isCreateSuccess || isUpdateSuccess;
+  const isPending = isCreatePending || isUpdatePending;
 
   const form = useForm<FormData>({
     resolver: zodResolver(newMemberSchema),
@@ -153,6 +155,9 @@ export default function UserForm() {
   }, [watchedActivePlan, watchedPaymentStart, calculateDueDate, form]);
 
   const handleModalClose = useCallback(() => {
+    // Prevent closing if operation is pending
+    if (isPending) return;
+
     setUserFormModal({
       isOpen: false,
       mode: "create",
@@ -161,14 +166,13 @@ export default function UserForm() {
     resetCreate();
     resetUpdate();
     form.reset();
-  }, [setUserFormModal, form, resetCreate, resetUpdate]);
-  console.log("is user modal open....",userFormModal);
+  }, [setUserFormModal, form, resetCreate, resetUpdate, isPending]);
 
   useEffect(() => {
     if (!userFormModal.isOpen) return;
 
     if (userFormModal.mode === "edit" && userFormModal.userData) {
-        console.log("user data----->",userFormModal.userData)
+      console.log("user data----->", userFormModal.userData);
 
       const data = userFormModal.userData;
 
@@ -210,7 +214,10 @@ export default function UserForm() {
 
   useEffect(() => {
     if (isSuccess) {
-      handleModalClose();
+      // Close modal automatically on success
+      setTimeout(() => {
+        handleModalClose();
+      }, 500); // Small delay to show success state
     }
   }, [isSuccess, handleModalClose]);
 
@@ -492,8 +499,21 @@ export default function UserForm() {
               </div>
             </div>
             <DialogFooter className="w-full flex !justify-center mt-6">
-              <Button type="submit" className="w-32 cursor-pointer">
-                {buttonText}
+              <Button
+                type="submit"
+                className="w-32 cursor-pointer"
+                disabled={isPending}
+              >
+                {isPending ? (
+                  <>
+                    <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+                    {userFormModal.mode === "edit"
+                      ? "Updating..."
+                      : "Creating..."}
+                  </>
+                ) : (
+                  buttonText
+                )}
               </Button>
             </DialogFooter>
           </form>
