@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/sidebar";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
+
 
 const data = {
   navMain: [
@@ -42,7 +44,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
   return (
     <Sidebar {...props}>
-      <SidebarHeader className="text-2xl font-bold px-4">Logo</SidebarHeader>
+      <SidebarHeader className="text-2xl font-bold px-4">
+        <Link href="/" className="flex items-center space-x-2">
+              <Image
+                src="/assets/logo_anatomy1.png" 
+                alt="Anatomy"
+                width={80}       
+                height={60}
+              />
+              
+            </Link>
+      </SidebarHeader>
       <SidebarContent>
         {/* We create a SidebarGroup for each parent. */}
         {data.navMain.map((item) => (

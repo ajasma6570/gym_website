@@ -62,8 +62,10 @@ export default function MembershipForm() {
     },
   });
 
+  
   // Memoize handlers to prevent unnecessary re-renders
   const handleSubmit = useCallback(
+  
     async (values: FormData) => {
       try {
         console.log("Form values:", values);
@@ -110,6 +112,7 @@ export default function MembershipForm() {
   }, [setMembershipFormModal, form, resetCreate, resetUpdate]);
 
   useEffect(() => {
+    console.log("Button cliked..............",membershipFormModal)
     if (!membershipFormModal.isOpen) return;
 
     if (
@@ -117,6 +120,7 @@ export default function MembershipForm() {
       membershipFormModal.membershipData
     ) {
       const data = membershipFormModal.membershipData;
+      console.log("Dataaaaaa------->",data);
 
       form.reset({
         id: data.id || "",

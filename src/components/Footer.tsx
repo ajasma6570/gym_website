@@ -14,7 +14,7 @@ export default function Footer() {
           <div className="space-y-6">
             <div>
               <h3 className="text-2xl font-bold text-red-600 mb-4">
-                PowerFit Gym
+            Anatomy Gym
               </h3>
               <p className="text-gray-300 leading-relaxed">
                 Transform your body and mind with our state-of-the-art facility

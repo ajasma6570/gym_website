@@ -11,49 +11,49 @@ const ChooseOurGym = [
     icon: <GiBiceps className="h-16 w-16 text-red-600" />,
     title: "Best Training",
     description:
-      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy",
+      "Get access to the best training programs designed to help you reach your fitness goals. Our certified trainers guide you with proven methods that ensure results.",
   },
   {
     icon: <RiTimerFlashLine className="h-16 w-16 text-red-600" />,
     title: "Quality Equipment",
     description:
-      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy",
+      "We offer state-of-the-art fitness equipment to provide a safe and effective workout experience. Maintain perfect form and push your limits with confidence.",
   },
   {
     icon: <GiBiceps className="h-16 w-16 text-red-600" />,
     title: "nutrition plan",
     description:
-      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy",
+      "Fuel your fitness journey with personalized nutrition plans tailored to your body type and goals. Get expert guidance to complement your workouts.",
   },
   {
     icon: <FaBicycle className="h-16 w-16 text-red-600" />,
     title: "Personal Training",
     description:
-      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy",
+      "Experience the benefits of personalized attention through one-on-one training sessions. Maximize your progress with customized workout routines.",
   },
 ];
 
 const trainers = [
   {
-    name: "John Smith",
+    name: "Power Rack",
     title: "Strength & Conditioning",
     image: "/assets/eq_1.jpeg",
     description:
-      "Certified personal trainer with 8+ years of experience in strength training and muscle building.",
+      "Heavy-duty power rack with adjustable safety bars and pull-up bar, ideal for squats, bench press, and full-body strength workouts.",
   },
   {
-    name: "Sarah Johnson",
+    name: "Yoga Mats & Blocks",
     title: "Yoga & Flexibility",
     image: "/assets/eq_2.jpeg",
     description:
-      "Yoga instructor specializing in flexibility, mindfulness, and holistic wellness approaches.",
+      "High-grip yoga mats and foam blocks for enhanced comfort, support, and alignment during stretching and flexibility routines.",
   },
   {
-    name: "Mike Davis",
+    name: "CrossFit Setup",
     title: "CrossFit & HIIT",
     image: "/assets/eq_3.jpeg",
     description:
-      "High-intensity training expert focused on functional fitness and athletic performance.",
+      "Complete CrossFit station with battle ropes, plyo boxes, kettlebells, and medicine balls built for high-intensity circuits and endurance.",
   },
 ];
 export default function Home() {
@@ -78,8 +78,7 @@ export default function Home() {
               <br /> Tomorrow
             </p>
             <p className="text-base text-white/90 mb-8 max-w-3xl">
-              Lorem Ipsum is simply dummy text of the printing and typesetting
-              industry. Lorem Ipsum has been the industry standard dummy
+              Whether you're just starting your fitness journey or leveling up your training, our gym is your home for strength, transformation, and well-being.
             </p>
             <button className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-colors duration-200 shadow-lg">
               Start Your Journey
@@ -120,7 +119,7 @@ export default function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full w-full">
           <div className="h-full w-full flex items-center justify-center">
             <Image
-              src="/assets/anatomy.jpeg"
+              src="/assets/image4.jpg"
               alt="Cross Training Rope Swing Exercise"
               width={520}
               height={600}
@@ -134,11 +133,12 @@ export default function Home() {
             </h2>
             <p className="text-2xl md:text-4xl lg:text-5xl font-bold text-red-600 mb-6 uppercase">
               Our complex has
-              <br /> the best trainers
+              the best trainers
+
             </p>
             <p>
-              Lorem Ipsum is simply dummy text of the printing and typesetting
-              industry. Lorem Ipsum has been the industry standard dummy
+                Top-rated trainers, modern equipment, and custom fitness plans make us your ultimate destination for health and wellness.
+
             </p>
 
             <ul className="list-disc pl-5  text-xl space-y-2">
@@ -189,10 +189,10 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-xl md:text-2xl font-semibold mb-4 uppercase text-white">
-              Meet Our Team
+              Meet Our Equipment
             </h2>
             <p className="text-3xl lg:text-4xl text-red-600 max-w-2xl mx-auto font-extrabold">
-              Expert Trainers <br /> Ready to Guide You
+             Top-Quality Machines <br /> Engineered for Performance and Safety
             </p>
           </div>
 

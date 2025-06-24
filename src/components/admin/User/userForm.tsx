@@ -162,17 +162,20 @@ export default function UserForm() {
     resetUpdate();
     form.reset();
   }, [setUserFormModal, form, resetCreate, resetUpdate]);
+  console.log("is user modal open....",userFormModal);
 
   useEffect(() => {
     if (!userFormModal.isOpen) return;
 
     if (userFormModal.mode === "edit" && userFormModal.userData) {
+        console.log("user data----->",userFormModal.userData)
+
       const data = userFormModal.userData;
 
       form.reset({
         name: data.name || "",
         gender: data.gender || "male",
-        phone: data.phone || "",
+        phone: String(data.phone || ""),
         age: data.age || 0,
         weight: data.weight || 0,
         height: data.height || 0,

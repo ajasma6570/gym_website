@@ -46,7 +46,7 @@ export type User = {
   id: string;
   name: string;
   gender: "male" | "female" | "other"; // use union type for better safety
-  phone: number;
+  phone: String;
   age: number;
   height: number;
   weight: number;
