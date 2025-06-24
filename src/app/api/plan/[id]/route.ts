@@ -1,14 +1,10 @@
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
-interface Context {
-  params: {
-    id: string;
-  };
-}
 
-export async function GET(req: NextRequest, context: Context) {
-  const id = context.params.id;
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const result = await params;
+  const id = parseInt(result.id);
 
   try {
     const plan = await prisma.plan.findUnique({ where: { id } });
@@ -22,12 +18,9 @@ export async function GET(req: NextRequest, context: Context) {
   }
 }
 
-export async function PUT(req: NextRequest, context: Context) {
-  const params = await context.params;
-  const id = parseInt(params.id);
-
-  console.log("PUT request for plan ID:", id);
-
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const result = await params;
+  const id = parseInt(result.id);
 
   if (isNaN(id)) {
     return NextResponse.json({ error: "Invalid plan ID" }, { status: 400 });
@@ -47,9 +40,9 @@ export async function PUT(req: NextRequest, context: Context) {
   }
 }
 
-export async function DELETE(req: NextRequest, context: Context) {
-  const params = await context.params;
-  const id = parseInt(params.id);
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const result = await params;
+  const id = parseInt(result.id);
 
   if (isNaN(id)) {
     return NextResponse.json({ error: "Invalid plan ID" }, { status: 400 });
