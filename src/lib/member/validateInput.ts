@@ -18,7 +18,7 @@ export interface ParsedMemberInput {
 type ValidationResult =
   | { valid: true; parsedBody: ParsedMemberInput }
   | { valid: false; error: string };
-
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function validateMemberInput(body: any): ValidationResult {
   const {
     name,

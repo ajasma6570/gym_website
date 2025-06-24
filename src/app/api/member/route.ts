@@ -3,7 +3,6 @@ import { prisma } from "@/lib/prisma";
 import { validateMemberInput } from "@/lib/member/validateInput";
 import { getPlanById } from "@/lib/member/getPlan";
 import { checkDuplicateMember } from "@/lib/member/checkDuplicate";
-import { getStatusFromPlanDuration } from "@/lib/member/getMemberStatus";
 import { createNewMember } from "@/lib/member/createMember";
 
 export async function POST(req: Request) {

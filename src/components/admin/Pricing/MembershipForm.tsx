@@ -1,11 +1,11 @@
 "use client";
-import { generateSequentialId } from "@/lib/utils";
-import { newMembershipSchema } from "@/lib/zod";
+import { createMembershipSchema, updateMembershipSchema } from "@/lib/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useEffect, useCallback, useContext } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
+import { Loader2Icon } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -32,29 +32,36 @@ import {
 import { usePlanCreate, usePlanUpdate } from "@/hooks/usePlan";
 import modalContext from "@/context/ModalContext";
 
-type FormData = z.infer<typeof newMembershipSchema>;
+type CreateFormData = z.infer<typeof createMembershipSchema>;
+type FormData = CreateFormData & { id?: number };
 
 export default function MembershipForm() {
   const {
     mutate: createPlan,
     isSuccess: isCreateSuccess,
+    isPending: isCreatePending,
     reset: resetCreate,
   } = usePlanCreate();
   const {
     mutate: updatePlan,
     isSuccess: isUpdateSuccess,
+    isPending: isUpdatePending,
     reset: resetUpdate,
   } = usePlanUpdate();
   const { membershipFormModal, setMembershipFormModal } =
     useContext(modalContext);
 
-  // Check if either create or update was successful
   const isSuccess = isCreateSuccess || isUpdateSuccess;
+  const isPending = isCreatePending || isUpdatePending;
+
+  const currentSchema =
+    membershipFormModal.mode === "edit"
+      ? updateMembershipSchema
+      : createMembershipSchema;
 
   const form = useForm<FormData>({
-    resolver: zodResolver(newMembershipSchema),
+    resolver: zodResolver(currentSchema),
     defaultValues: {
-      id: "",
       name: "",
       duration: 0,
       amount: 0,
@@ -62,28 +69,25 @@ export default function MembershipForm() {
     },
   });
 
-  
-  // Memoize handlers to prevent unnecessary re-renders
   const handleSubmit = useCallback(
-  
     async (values: FormData) => {
       try {
-        console.log("Form values:", values);
         console.log("Modal mode:", membershipFormModal.mode);
 
         if (membershipFormModal.mode === "edit") {
           // For edit mode, include the plan ID
           const updateData = {
             ...values,
-            id: membershipFormModal.membershipData?.id,
+            id: membershipFormModal.membershipData?.id || 0,
           };
           console.log("Update data:", updateData);
           updatePlan(updateData);
         } else {
-          // For create mode, add generated ID
           const createData = {
-            ...values,
-            id: generateSequentialId(1000).toString(),
+            name: values.name,
+            duration: values.duration,
+            amount: values.amount,
+            status: values.status,
           };
           console.log("Create data:", createData);
           createPlan(createData);
@@ -112,7 +116,6 @@ export default function MembershipForm() {
   }, [setMembershipFormModal, form, resetCreate, resetUpdate]);
 
   useEffect(() => {
-    console.log("Button cliked..............",membershipFormModal)
     if (!membershipFormModal.isOpen) return;
 
     if (
@@ -120,10 +123,9 @@ export default function MembershipForm() {
       membershipFormModal.membershipData
     ) {
       const data = membershipFormModal.membershipData;
-      console.log("Dataaaaaa------->",data);
 
       form.reset({
-        id: data.id || "",
+        id: data.id || 0,
         name: data.name || "",
         duration: data.duration || 0,
         amount: data.amount || 0,
@@ -131,7 +133,6 @@ export default function MembershipForm() {
       });
     } else {
       form.reset({
-        id: "",
         name: "",
         duration: 0,
         amount: 0,
@@ -166,7 +167,9 @@ export default function MembershipForm() {
 
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(handleSubmit)}
+            onSubmit={form.handleSubmit(handleSubmit, (errors) => {
+              console.warn("Validation failed:", errors);
+            })}
             className="flex flex-col flex-1 min-h-0"
           >
             <div className="flex-1 overflow-y-auto px-1">
@@ -261,8 +264,21 @@ export default function MembershipForm() {
               </div>
             </div>
             <DialogFooter className="w-full flex !justify-center mt-6">
-              <Button type="submit" className="w-60 cursor-pointer">
-                {buttonText}
+              <Button
+                type="submit"
+                className="w-60 cursor-pointer"
+                disabled={isPending}
+              >
+                {isPending ? (
+                  <>
+                    <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+                    {membershipFormModal.mode === "edit"
+                      ? "Updating..."
+                      : "Creating..."}
+                  </>
+                ) : (
+                  buttonText
+                )}
               </Button>
             </DialogFooter>
           </form>

@@ -1,5 +1,5 @@
 import { showToastMessage } from "@/lib/toast";
-import { newMembershipSchema } from "@/lib/zod";
+import { createMembershipSchema, updateMembershipSchema } from "@/lib/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 
@@ -18,7 +18,7 @@ export const usePlanList = () => {
 export const usePlanCreate = () => {
     const query = useQueryClient();
     return useMutation({
-        mutationFn: async (newPlan: z.infer<typeof newMembershipSchema>) => {
+        mutationFn: async (newPlan: z.infer<typeof createMembershipSchema>) => {
             const response = await fetch("/api/plan", {
                 method: "POST",
                 headers: {
@@ -47,9 +47,9 @@ export const usePlanCreate = () => {
 export const usePlanUpdate = () => {
     const query = useQueryClient();
     return useMutation({
-        mutationFn: async (updatedPlan: z.infer<typeof newMembershipSchema>) => {
-            console.log("updated palllllllllllll",updatedPlan)
-            const response = await fetch("/api/plan", {
+        mutationFn: async (updatedPlan: z.infer<typeof updateMembershipSchema>) => {
+            console.log("updated plan", updatedPlan)
+            const response = await fetch(`/api/plan/${Number(updatedPlan?.id)}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -78,7 +78,7 @@ export const usePlanDelete = () => {
     const query = useQueryClient();
     return useMutation({
         mutationFn: async (planId: string) => {
-            const response = await fetch("/api/plans", {
+            const response = await fetch(`/api/plan/${planId}`, {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",

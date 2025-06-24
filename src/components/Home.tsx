@@ -78,7 +78,9 @@ export default function Home() {
               <br /> Tomorrow
             </p>
             <p className="text-base text-white/90 mb-8 max-w-3xl">
-              Whether you're just starting your fitness journey or leveling up your training, our gym is your home for strength, transformation, and well-being.
+              Whether you&apos;re just starting your fitness journey or leveling
+              up your training, our gym is your home for strength,
+              transformation, and well-being.
             </p>
             <button className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-colors duration-200 shadow-lg">
               Start Your Journey
@@ -132,13 +134,11 @@ export default function Home() {
               why choose us
             </h2>
             <p className="text-2xl md:text-4xl lg:text-5xl font-bold text-red-600 mb-6 uppercase">
-              Our complex has
-              the best trainers
-
+              Our complex has the best trainers
             </p>
             <p>
-                Top-rated trainers, modern equipment, and custom fitness plans make us your ultimate destination for health and wellness.
-
+              Top-rated trainers, modern equipment, and custom fitness plans
+              make us your ultimate destination for health and wellness.
             </p>
 
             <ul className="list-disc pl-5  text-xl space-y-2">
@@ -192,7 +192,7 @@ export default function Home() {
               Meet Our Equipment
             </h2>
             <p className="text-3xl lg:text-4xl text-red-600 max-w-2xl mx-auto font-extrabold">
-             Top-Quality Machines <br /> Engineered for Performance and Safety
+              Top-Quality Machines <br /> Engineered for Performance and Safety
             </p>
           </div>
 

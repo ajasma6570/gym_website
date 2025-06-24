@@ -112,8 +112,8 @@ export const updateMemberSchema = addDateValidation(
 );
 
 
-export const newMembershipSchema = object({
-    id: string({ required_error: "ID is required" }),
+// Base membership schema without ID for creation
+export const baseMembershipSchema = object({
     name: string({ required_error: "Plan name is required" })
         .min(1, "Plan name is required")
         .min(3, "Plan name must be at least 3 characters")
@@ -125,4 +125,17 @@ export const newMembershipSchema = object({
     status: string({ required_error: "Status is required" })
         .min(1, "Status is required")
         .regex(/^(active|inactive)$/, "Status must be either 'active' or 'inactive'"),
-})
+});
+
+// Schema for creating new membership (no ID required)
+export const createMembershipSchema = baseMembershipSchema;
+
+// Schema for updating membership (includes ID)
+export const updateMembershipSchema = baseMembershipSchema.extend({
+    id: coerce.number({ required_error: "ID is required" })
+        .int("ID must be an integer")
+        .positive("ID must be positive"),
+});
+
+// Keep the old schema for backward compatibility
+export const newMembershipSchema = updateMembershipSchema;

@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { getStatusFromPlanDuration } from "./getMemberStatus";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function createNewMember(data: any, plan: any) {
   const paymentStartDate = data.paymentStart ? new Date(data.paymentStart) : new Date();
   const { isActive, expiryDate } = getStatusFromPlanDuration(paymentStartDate, plan.duration);
@@ -23,10 +24,10 @@ export async function createNewMember(data: any, plan: any) {
       planId: data.planId,
       payments: data.initialPayment
         ? {
-            create: {
-              amount: data.initialPayment,
-            },
-          }
+          create: {
+            amount: data.initialPayment,
+          },
+        }
         : undefined,
     },
   });

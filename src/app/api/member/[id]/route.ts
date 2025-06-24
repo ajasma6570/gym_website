@@ -34,7 +34,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     const { isActive } = getStatusFromPlanDuration(paymentStartDate, plan.duration);
 
-    // Remove `id` from data
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { id: _, ...cleanData } = data;
 
     const updated = await prisma.member.update({
@@ -62,7 +62,7 @@ export async function DELETE(
   const { id } = params;
   const memberId = parseInt(id);
   try {
-    
+
     await prisma.payment.updateMany({
       where: { memberId: memberId },
       data: {

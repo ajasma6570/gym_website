@@ -23,13 +23,22 @@ export async function GET(req: NextRequest, context: Context) {
 }
 
 export async function PUT(req: NextRequest, context: Context) {
-  const id = context.params.id;
+  const params = await context.params;
+  const id = parseInt(params.id);
+
+  console.log("PUT request for plan ID:", id);
+
+
+  if (isNaN(id)) {
+    return NextResponse.json({ error: "Invalid plan ID" }, { status: 400 });
+  }
+
   const { name, duration, amount, status } = await req.json();
 
   try {
     const updatedPlan = await prisma.plan.update({
       where: { id },
-      data: { name, duration, amount,status },
+      data: { name, duration, amount, status },
     });
     return NextResponse.json(updatedPlan);
   } catch (error) {
@@ -39,7 +48,12 @@ export async function PUT(req: NextRequest, context: Context) {
 }
 
 export async function DELETE(req: NextRequest, context: Context) {
-  const id = context.params.id;
+  const params = await context.params;
+  const id = parseInt(params.id);
+
+  if (isNaN(id)) {
+    return NextResponse.json({ error: "Invalid plan ID" }, { status: 400 });
+  }
 
   try {
     await prisma.plan.delete({ where: { id } });

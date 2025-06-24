@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useContext } from "react";
+import React, { useCallback, useContext, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -9,28 +9,34 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Loader2Icon } from "lucide-react";
 import { usePlanDelete } from "@/hooks/usePlan";
 import modalContext from "@/context/ModalContext";
 
 export default function PlanDeleteConfirmModal() {
   const { planDeleteConfirmModal, setPlanDeleteConfirmModal } =
     useContext(modalContext);
-  const { mutate: deletePlan, isPending } = usePlanDelete();
+  const { mutate: deletePlan, isPending, isSuccess } = usePlanDelete();
 
   const handleConfirmDelete = () => {
     if (planDeleteConfirmModal.planId) {
       deletePlan(planDeleteConfirmModal.planId);
-      handleClose();
     }
   };
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setPlanDeleteConfirmModal({
       isOpen: false,
       planId: null,
       planName: null,
     });
-  };
+  }, [setPlanDeleteConfirmModal]);
+
+  useEffect(() => {
+    if (isSuccess) {
+      handleClose();
+    }
+  }, [isSuccess, handleClose]);
 
   return (
     <Dialog open={planDeleteConfirmModal.isOpen} onOpenChange={handleClose}>
@@ -58,6 +64,7 @@ export default function PlanDeleteConfirmModal() {
             onClick={handleConfirmDelete}
             disabled={isPending}
           >
+            {isPending && <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />}
             {isPending ? "Deleting..." : "Delete"}
           </Button>
         </DialogFooter>

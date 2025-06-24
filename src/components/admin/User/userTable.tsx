@@ -46,7 +46,7 @@ export type User = {
   id: string;
   name: string;
   gender: "male" | "female" | "other"; // use union type for better safety
-  phone: String;
+  phone: string;
   age: number;
   height: number;
   weight: number;
@@ -150,7 +150,6 @@ export default function Page({ data }: { data: User[] }) {
               ? "active"
               : "inactive"
             : String(rawStatus).toLowerCase();
-
 
         const getColor = () => {
           switch (status.toLowerCase()) {
@@ -338,9 +337,9 @@ export default function Page({ data }: { data: User[] }) {
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
                     </TableHead>
                   );
                 })}
