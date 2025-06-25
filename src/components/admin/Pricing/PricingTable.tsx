@@ -13,9 +13,14 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
+import {
+  ArrowUpDown,
+  ChevronDown,
+  MoreHorizontal,
+  Loader2,
+} from "lucide-react";
 import modalContext from "@/context/ModalContext";
-
+import { Plan, PlanList } from "@/lib/validation/planSchema";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -36,15 +41,17 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-export type Plan = {
-  id: string;
-  name: string;
-  duration: number;
-  amount: string;
-  status: string;
-};
-
-export default function Page({ data }: { data: Plan[] }) {
+export default function Page({
+  data,
+  isLoading,
+  isSuccess,
+  isPending,
+}: {
+  data: PlanList;
+  isLoading: boolean;
+  isSuccess: boolean;
+  isPending: boolean;
+}) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -53,7 +60,7 @@ export default function Page({ data }: { data: Plan[] }) {
     useContext(modalContext);
 
   const handleDeletePlan = useCallback(
-    (planId: string, planName: string) => {
+    (planId: number, planName: string) => {
       setPlanDeleteConfirmModal({
         isOpen: true,
         planId: planId,
@@ -194,7 +201,7 @@ export default function Page({ data }: { data: Plan[] }) {
   ];
 
   const table = useReactTable({
-    data,
+    data: isSuccess ? data : [],
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -271,7 +278,19 @@ export default function Page({ data }: { data: Plan[] }) {
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
+            {isLoading && isPending ? (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
+                  <Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" />
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Loading plans...
+                  </p>
+                </TableCell>
+              </TableRow>
+            ) : isSuccess && table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}

@@ -1,38 +1,23 @@
 "use client";
-import { createMembershipSchema, updateMembershipSchema } from "@/lib/zod";
+import {
+  createPlanSchema,
+  updatePlanSchema,
+} from "@/lib/validation/planSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useEffect, useCallback, useContext } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Loader2Icon } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import * as Dialog from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import * as Form from "@/components/ui/form";
+import * as SelectField from "@/components/ui/select";
 import { usePlanCreate, usePlanUpdate } from "@/hooks/usePlan";
 import modalContext from "@/context/ModalContext";
+import { DialogDescription } from "@radix-ui/react-dialog";
 
-type CreateFormData = z.infer<typeof createMembershipSchema>;
+type CreateFormData = z.infer<typeof createPlanSchema>;
 type FormData = CreateFormData & { id?: number };
 
 export default function MembershipForm() {
@@ -55,9 +40,7 @@ export default function MembershipForm() {
   const isPending = isCreatePending || isUpdatePending;
 
   const currentSchema =
-    membershipFormModal.mode === "edit"
-      ? updateMembershipSchema
-      : createMembershipSchema;
+    membershipFormModal.mode === "edit" ? updatePlanSchema : createPlanSchema;
 
   const form = useForm<FormData>({
     resolver: zodResolver(currentSchema),
@@ -72,25 +55,15 @@ export default function MembershipForm() {
   const handleSubmit = useCallback(
     async (values: FormData) => {
       try {
-        console.log("Modal mode:", membershipFormModal.mode);
-
         if (membershipFormModal.mode === "edit") {
-          // For edit mode, include the plan ID
-          const updateData = {
-            ...values,
-            id: membershipFormModal.membershipData?.id || 0,
-          };
-          console.log("Update data:", updateData);
-          updatePlan(updateData);
+          const parsed = updatePlanSchema.safeParse(values);
+          if (parsed.success) {
+            updatePlan(parsed.data);
+          } else {
+            console.warn("Validation failed:", parsed.error);
+          }
         } else {
-          const createData = {
-            name: values.name,
-            duration: values.duration,
-            amount: values.amount,
-            status: values.status,
-          };
-          console.log("Create data:", createData);
-          createPlan(createData);
+          createPlan(values);
         }
       } catch (error) {
         console.error("Form submission error:", error);
@@ -159,13 +132,18 @@ export default function MembershipForm() {
   const buttonText = membershipFormModal.mode === "edit" ? "Update" : "Create";
 
   return (
-    <Dialog open={membershipFormModal.isOpen} onOpenChange={handleModalClose}>
-      <DialogContent className="sm:max-w-3xl max-h-[90vh] flex flex-col">
-        <DialogHeader>
-          <DialogTitle>{dialogTitle}</DialogTitle>
-        </DialogHeader>
+    <Dialog.Dialog
+      aria-describedby={"membership-form-dialog"}
+      open={membershipFormModal.isOpen}
+      onOpenChange={handleModalClose}
+    >
+      <Dialog.DialogContent className="sm:max-w-3xl max-h-[90vh] flex flex-col">
+        <Dialog.DialogHeader>
+          <Dialog.DialogTitle>{dialogTitle}</Dialog.DialogTitle>
+          <DialogDescription></DialogDescription>
+        </Dialog.DialogHeader>
 
-        <Form {...form}>
+        <Form.Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleSubmit, (errors) => {
               console.warn("Validation failed:", errors);
@@ -174,27 +152,27 @@ export default function MembershipForm() {
           >
             <div className="flex-1 overflow-y-auto px-1">
               <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-6 mt-2">
-                <FormField
+                <Form.FormField
                   name="name"
                   control={form.control}
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Plan Name</FormLabel>
-                      <FormControl>
+                    <Form.FormItem>
+                      <Form.FormLabel>Plan Name</Form.FormLabel>
+                      <Form.FormControl>
                         <Input placeholder="Enter plan name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
+                      </Form.FormControl>
+                      <Form.FormMessage />
+                    </Form.FormItem>
                   )}
                 />
 
-                <FormField
+                <Form.FormField
                   name="duration"
                   control={form.control}
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Duration (Days)</FormLabel>
-                      <FormControl>
+                    <Form.FormItem>
+                      <Form.FormLabel>Duration (Days)</Form.FormLabel>
+                      <Form.FormControl>
                         <Input
                           type="number"
                           placeholder="Number of days"
@@ -206,19 +184,19 @@ export default function MembershipForm() {
                             )
                           }
                         />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
+                      </Form.FormControl>
+                      <Form.FormMessage />
+                    </Form.FormItem>
                   )}
                 />
 
-                <FormField
+                <Form.FormField
                   name="amount"
                   control={form.control}
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Amount (₹)</FormLabel>
-                      <FormControl>
+                    <Form.FormItem>
+                      <Form.FormLabel>Amount (₹)</Form.FormLabel>
+                      <Form.FormControl>
                         <Input
                           type="number"
                           step="0.01"
@@ -231,39 +209,43 @@ export default function MembershipForm() {
                             )
                           }
                         />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
+                      </Form.FormControl>
+                      <Form.FormMessage />
+                    </Form.FormItem>
                   )}
                 />
 
-                <FormField
+                <Form.FormField
                   name="status"
                   control={form.control}
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Status</FormLabel>
-                      <FormControl>
-                        <Select
+                    <Form.FormItem>
+                      <Form.FormLabel>Status</Form.FormLabel>
+                      <Form.FormControl>
+                        <SelectField.Select
                           onValueChange={field.onChange}
                           value={field.value}
                         >
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select plan status" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="active">Active</SelectItem>
-                            <SelectItem value="inactive">Inactive</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
+                          <SelectField.SelectTrigger className="w-full">
+                            <SelectField.SelectValue placeholder="Select plan status" />
+                          </SelectField.SelectTrigger>
+                          <SelectField.SelectContent>
+                            <SelectField.SelectItem value="active">
+                              Active
+                            </SelectField.SelectItem>
+                            <SelectField.SelectItem value="inactive">
+                              Inactive
+                            </SelectField.SelectItem>
+                          </SelectField.SelectContent>
+                        </SelectField.Select>
+                      </Form.FormControl>
+                      <Form.FormMessage />
+                    </Form.FormItem>
                   )}
                 />
               </div>
             </div>
-            <DialogFooter className="w-full flex !justify-center mt-6">
+            <Dialog.DialogFooter className="w-full flex !justify-center mt-6">
               <Button
                 type="submit"
                 className="w-60 cursor-pointer"
@@ -280,10 +262,10 @@ export default function MembershipForm() {
                   buttonText
                 )}
               </Button>
-            </DialogFooter>
+            </Dialog.DialogFooter>
           </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
+        </Form.Form>
+      </Dialog.DialogContent>
+    </Dialog.Dialog>
   );
 }

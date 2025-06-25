@@ -1,4 +1,3 @@
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,50 +7,59 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Gender {
+  male
+  female
+  other
+}
+
+enum PlanStatus {
+  active
+  inactive
+}
+
 model Member {
-  id            Int        @id @default(autoincrement()) 
-  name          String
-  gender        String
-  phone         String
-  age           Int
-  height        Float
-  weight        Float
-  joiningDate   DateTime   @default(now())
-  
-  activePlan    String?
-  status        Boolean  @default(false)
-  paymentStart  DateTime?
-  dueDate       DateTime?
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
+  id          Int      @id @default(autoincrement())
+  name        String
+  gender      Gender
+  phone       String   @unique
+  age         Int
+  height      Float
+  weight      Float
+  joiningDate DateTime @default(now())
 
-  planId        Int?                                       
-  plan          Plan?       @relation(fields: [planId], references: [id])
-  payments      Payment[]
-  isDeleted     Boolean   @default(false)
-  deletedAt     DateTime? 
-  @@unique([name, phone]) 
+  planId     Int?
+  plan       Plan?   @relation(fields: [planId], references: [id])
+  activePlan String?
+  status     Boolean @default(false)
 
+  paymentStart DateTime?
+  dueDate      DateTime?
 
+  payments  Payment[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model Plan {
-  id       Int      @id @default(autoincrement())          
-  name     String
-  duration Int      // in days
-  amount   Int
-  members  Member[]
-  status   String
+  id        Int        @id @default(autoincrement())
+  name      String     @unique
+  duration  Int
+  amount    Float
+  status    PlanStatus @default(active)
+  members   Member[]
+  isDeleted Boolean    @default(false)
+  deletedAt DateTime?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 }
 
 model Payment {
-  id        Int      @id @default(autoincrement())        
-  memberId  Int                                        
-  amount    Float
-  date      DateTime @default(now())
-  member    Member   @relation(fields: [memberId], references: [id])
-  isDeleted Boolean   @default(false)
-  deletedAt DateTime?
+  id       Int      @id @default(autoincrement())
+  memberId Int
+  member   Member   @relation(fields: [memberId], references: [id])
+  amount   Float
+  date     DateTime @default(now())
 }
 
 model Task {
@@ -61,4 +69,3 @@ model Task {
   completed   Boolean  @default(false)
   createdAt   DateTime @default(now())
 }
-

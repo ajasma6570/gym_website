@@ -1,16 +1,10 @@
 import { z } from "zod";
 
-//
-// ─── MEMBER SCHEMA ──────────────────────────────────────────────────────────────
-//
-
-// Helper: Converts date strings (YYYY-MM-DD) to JS Date
 const dateString = z
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
     .transform((val) => new Date(val));
 
-// Base member schema without ID
 const baseMemberSchema = z.object({
     name: z
         .string({ required_error: "Name is required" })
@@ -51,7 +45,6 @@ const baseMemberSchema = z.object({
     status: z.boolean(),
 });
 
-// Add date logic: joiningDate ≤ paymentStart ≤ dueDate
 const addDateValidation = (schema: typeof baseMemberSchema) =>
     schema.superRefine((data, ctx) => {
         const { joiningDate, paymentStart, dueDate } = data;
@@ -88,49 +81,3 @@ export const updateMemberSchema = addDateValidation(
         id: z.number({ required_error: "ID is required" }).int().positive(),
     })
 );
-
-//
-// ─── PLAN / MEMBERSHIP SCHEMA ────────────────────────────────────────────────────
-//
-
-export const basePlanSchema = z.object({
-    name: z
-        .string({ required_error: "Plan name is required" })
-        .min(3, "Plan name must be at least 3 characters")
-        .max(50, "Plan name must be at most 50 characters"),
-
-    duration: z
-        .number({ required_error: "Duration is required" })
-        .int("Duration must be a whole number")
-        .positive("Duration must be a positive number"),
-
-    amount: z
-        .number({ required_error: "Amount is required" })
-        .int("Amount must be an integer")
-        .positive("Amount must be a positive number"),
-
-    status: z.enum(["active", "inactive"], {
-        required_error: "Status is required",
-    }),
-});
-
-export const createPlanSchema = basePlanSchema;
-
-export const updatePlanSchema = basePlanSchema.extend({
-    id: z.number({ required_error: "ID is required" }).int().positive(),
-});
-
-//
-// ─── SIGN-IN SCHEMA ──────────────────────────────────────────────────────────────
-//
-
-export const signInSchema = z.object({
-    username: z
-        .string({ required_error: "Email is required" })
-        .min(1, "Email is required"),
-
-    password: z
-        .string({ required_error: "Password is required" })
-        .min(6, "Password must be at least 6 characters long")
-        .max(20, "Password must be at most 20 characters long"),
-});

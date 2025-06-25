@@ -1,5 +1,8 @@
 import { showToastMessage } from "@/lib/toast";
-import { createMembershipSchema, updateMembershipSchema } from "@/lib/zod";
+import {
+    createPlanSchema,
+    updatePlanSchema,
+} from "@/lib/validation/planSchema";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 
@@ -18,17 +21,18 @@ export const usePlanList = () => {
 export const usePlanCreate = () => {
     const query = useQueryClient();
     return useMutation({
-        mutationFn: async (newPlan: z.infer<typeof createMembershipSchema>) => {
+        mutationFn: async (data: z.infer<typeof createPlanSchema>) => {
             const response = await fetch("/api/plan", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify(newPlan),
+                body: JSON.stringify(data),
             });
 
             if (!response.ok) {
-                throw new Error("Failed to create plan");
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Failed to create plan");
             }
 
             return response.json();
@@ -39,7 +43,7 @@ export const usePlanCreate = () => {
         },
         onError: (error) => {
             console.error("Error creating plan:", error);
-            showToastMessage("Failed to create plan", "error");
+            showToastMessage(error.message, "error");
         },
     });
 }
@@ -47,18 +51,18 @@ export const usePlanCreate = () => {
 export const usePlanUpdate = () => {
     const query = useQueryClient();
     return useMutation({
-        mutationFn: async (updatedPlan: z.infer<typeof updateMembershipSchema>) => {
-            console.log("updated plan", updatedPlan)
-            const response = await fetch(`/api/plan/${Number(updatedPlan?.id)}`, {
+        mutationFn: async (data: z.infer<typeof updatePlanSchema>) => {
+            const response = await fetch(`/api/plan/${data?.id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify(updatedPlan),
+                body: JSON.stringify(data),
             });
 
             if (!response.ok) {
-                throw new Error("Failed to update plan");
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Failed to create plan");
             }
 
             return response.json();
@@ -69,7 +73,7 @@ export const usePlanUpdate = () => {
         },
         onError: (error) => {
             console.error("Error updating plan:", error);
-            showToastMessage("Failed to update plan", "error");
+            showToastMessage(error.message, "error");
         },
     });
 }
@@ -77,7 +81,7 @@ export const usePlanUpdate = () => {
 export const usePlanDelete = () => {
     const query = useQueryClient();
     return useMutation({
-        mutationFn: async (planId: string) => {
+        mutationFn: async (planId: number) => {
             const response = await fetch(`/api/plan/${planId}`, {
                 method: "DELETE",
                 headers: {

@@ -4,6 +4,7 @@ import React, { useCallback, useContext, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -43,6 +44,7 @@ export default function PlanDeleteConfirmModal() {
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Confirm Delete</DialogTitle>
+          <DialogDescription></DialogDescription>
         </DialogHeader>
 
         <div className="py-4">

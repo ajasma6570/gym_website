@@ -34,13 +34,13 @@ interface ModalContextType {
   >;
   planDeleteConfirmModal: {
     isOpen: boolean;
-    planId: string | null;
+    planId: number | null;
     planName: string | null;
   };
   setPlanDeleteConfirmModal: React.Dispatch<
     React.SetStateAction<{
       isOpen: boolean;
-      planId: string | null;
+      planId: number | null;
       planName: string | null;
     }>
   >;
@@ -73,7 +73,7 @@ const modalContext = createContext<ModalContextType>({
   setDeleteConfirmModal: () => {},
   planDeleteConfirmModal: {
     isOpen: false,
-    planId: null as string | null,
+    planId: null as number | null,
     planName: null as string | null,
   },
   setPlanDeleteConfirmModal: () => {},
@@ -100,7 +100,7 @@ export const ModalProvider = ({ children }: ModalProviderProps) => {
 
   const [planDeleteConfirmModal, setPlanDeleteConfirmModal] = useState({
     isOpen: false,
-    planId: null as string | null,
+    planId: null as number | null,
     planName: null as string | null,
   });
 

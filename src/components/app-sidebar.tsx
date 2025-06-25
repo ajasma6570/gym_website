@@ -16,7 +16,6 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 
-
 const data = {
   navMain: [
     {
@@ -32,8 +31,8 @@ const data = {
           url: "/admin/members",
         },
         {
-          title: "Membership",
-          url: "/admin/membership",
+          title: "Plans",
+          url: "/admin/plans",
         },
       ],
     },
@@ -46,14 +45,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     <Sidebar {...props}>
       <SidebarHeader className="text-2xl font-bold px-4">
         <Link href="/" className="flex items-center space-x-2">
-              <Image
-                src="/assets/logo_anatomy1.png" 
-                alt="Anatomy"
-                width={80}       
-                height={60}
-              />
-              
-            </Link>
+          <Image
+            src="/assets/logo_anatomy1.png"
+            alt="Anatomy"
+            width={80}
+            height={60}
+          />
+        </Link>
       </SidebarHeader>
       <SidebarContent>
         {/* We create a SidebarGroup for each parent. */}
