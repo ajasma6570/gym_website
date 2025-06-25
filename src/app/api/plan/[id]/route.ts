@@ -32,9 +32,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     return NextResponse.json({ error: "Invalid plan ID" }, { status: 400 });
   }
 
-  let body = await req.json();
+  const body = await req.json();
 
-  //check if the name is unique
   const existingPlan = await prisma.plan.findFirst({
     where: {
       name: body.name,
@@ -81,13 +80,8 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     });
 
     return NextResponse.json({ message: "Plan deleted successfully", plan: deletedPlan });
-  } catch (error: any) {
+  } catch (error) {
     console.error("DELETE plan failed:", error);
-
-    if (error.code === "P2025") {
-      return NextResponse.json({ error: "Plan not found" }, { status: 404 });
-    }
-
     return NextResponse.json({ error: "Failed to delete plan" }, { status: 500 });
   }
 }

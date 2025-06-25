@@ -2,14 +2,14 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { validateMemberInput } from "@/lib/member/validateInput";
 import { getPlanById } from "@/lib/member/getPlan";
-import { checkDuplicateMember } from "@/lib/member/checkDuplicate";
 import { createNewMember } from "@/lib/member/createMember";
 
 export async function POST(req: Request) {
-  try {
-    const body = await req.json();
+  const body = await req.json();
 
+  try {
     const result = validateMemberInput(body);
+
     if (!result.valid) {
       return NextResponse.json({ error: result.error }, { status: 400 });
     }
@@ -21,12 +21,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Plan not found" }, { status: 400 });
     }
 
-    const exists = await checkDuplicateMember(parsedBody.name, parsedBody.phone);
-    if (exists) {
-      return NextResponse.json(
-        { error: "Member with the same name and phone already exists" },
-        { status: 409 }
-      );
+    const existingMember = await prisma.member.findFirst({
+      where: {
+        phone: parsedBody.phone,
+      },
+    });
+
+    if (existingMember) {
+      return NextResponse.json({ error: "Member with this phone number already exists" }, { status: 400 });
     }
 
     const member = await createNewMember(parsedBody, plan);
@@ -41,8 +43,9 @@ export async function POST(req: Request) {
 export async function GET() {
   try {
     const members = await prisma.member.findMany({
-      where: {
-        isDeleted: false,
+      include: {
+        plan: true,
+        payments: true,
       },
     });
 

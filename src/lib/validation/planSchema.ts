@@ -28,4 +28,4 @@ export const updatePlanSchema = basePlanSchema.extend({
 });
 
 export type Plan = z.infer<typeof updatePlanSchema>;
-export type PlanList = Plan[]; // this is a list of plans
+export type PlanList = Plan[];

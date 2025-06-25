@@ -1,7 +1,7 @@
 
 export interface ParsedMemberInput {
   name: string;
-  gender: string;
+  gender: "male" | "female" | "other";
   phone: string;
   age: number;
   height: number;
@@ -30,42 +30,47 @@ export function validateMemberInput(body: any): ValidationResult {
     joiningDate,
     paymentStart,
     dueDate,
-    createdAt,
-    updatedAt,
-    initialPayment,
-    activePlan,
+    planId, // Form now sends planId directly
+    activePlan, // Keep for backward compatibility
+    initialPayment, // Optional initial payment amount
   } = body;
 
   // Validate required fields
-  if (!name || !phone || !joiningDate || !activePlan) {
+  if (!name || !phone || !joiningDate || (!planId && !activePlan)) {
     return {
       valid: false,
-      error: "Missing required fields: name, phone, joiningDate, or activePlan",
+      error: "Missing required fields: name, phone, joiningDate, or planId",
     };
   }
 
-  // Validate numeric fields
-  const planId = parseInt(activePlan);
-  if (isNaN(planId)) {
+  // Handle planId from either planId or activePlan field
+  const finalPlanId = planId || activePlan;
+  const parsedPlanId = Number(finalPlanId);
+  if (isNaN(parsedPlanId) || parsedPlanId <= 0) {
     return { valid: false, error: "Invalid plan ID" };
+  }
+
+  // Validate gender field
+  const validGenders = ["male", "female", "other"];
+  const normalizedGender = (gender || "male").toLowerCase();
+  if (!validGenders.includes(normalizedGender)) {
+    return { valid: false, error: "Gender must be 'male', 'female', or 'other'" };
   }
 
   return {
     valid: true,
     parsedBody: {
       name,
-      gender,
+      gender: normalizedGender as "male" | "female" | "other",
       phone,
-      age: Number(age),
-      height: Number(height),
-      weight: Number(weight),
+      age: Number(age) || 0,
+      height: Number(height) || 0,
+      weight: Number(weight) || 0,
       joiningDate,
       paymentStart,
       dueDate,
-      createdAt,
-      updatedAt,
+      planId: parsedPlanId,
       initialPayment: initialPayment ? Number(initialPayment) : undefined,
-      planId,
     },
   };
 }

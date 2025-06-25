@@ -1,14 +1,11 @@
 import { z } from "zod";
 
-const dateString = z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
-    .transform((val) => new Date(val));
-
+// Base schema for member data that aligns with Prisma model
 const baseMemberSchema = z.object({
     name: z
         .string({ required_error: "Name is required" })
-        .min(2, "Name must be at least 2 characters"),
+        .min(2, "Name must be at least 2 characters")
+        .max(50, "Name must be at most 50 characters"),
 
     gender: z.enum(["male", "female", "other"], {
         required_error: "Gender is required",
@@ -32,24 +29,47 @@ const baseMemberSchema = z.object({
 
     height: z
         .number({ required_error: "Height is required" })
-        .int("Height must be a whole number in centimeters")
         .positive("Height must be a positive number")
         .min(50, "Height must be at least 50 cm")
         .max(300, "Height must be realistic"),
 
-    joiningDate: dateString,
-    paymentStart: dateString,
-    dueDate: dateString,
+    joiningDate: z
+        .string({ required_error: "Joining date is required" })
+        .min(1, "Joining date is required")
+        .regex(/^\d{4}-\d{2}-\d{2}$/, "Joining date must be in YYYY-MM-DD format"),
 
-    planId: z.number().int().positive(),
-    status: z.boolean(),
+    // Form field for selecting plan (will be converted to planId)
+    activePlan: z
+        .string({ required_error: "Active plan is required" })
+        .min(1, "Please select a membership plan"),
+
+    paymentStart: z
+        .string({ required_error: "Payment start date is required" })
+        .min(1, "Payment start date is required")
+        .regex(/^\d{4}-\d{2}-\d{2}$/, "Payment start date must be in YYYY-MM-DD format"),
+
+    dueDate: z
+        .string({ required_error: "Due date is required" })
+        .min(1, "Due date is required")
+        .regex(/^\d{4}-\d{2}-\d{2}$/, "Due date must be in YYYY-MM-DD format"),
 });
 
-const addDateValidation = (schema: typeof baseMemberSchema) =>
-    schema.superRefine((data, ctx) => {
+// Function to add date validation refinements
+const addDateValidation = (schema: typeof baseMemberSchema) => {
+    return schema.superRefine((data, ctx) => {
         const { joiningDate, paymentStart, dueDate } = data;
 
-        if (joiningDate && paymentStart && joiningDate > paymentStart) {
+        // Convert string dates to Date objects for comparison
+        const joinDate = new Date(joiningDate);
+        const payStart = new Date(paymentStart);
+        const due = new Date(dueDate);
+
+        // Check if dates are valid
+        if (isNaN(joinDate.getTime()) || isNaN(payStart.getTime()) || isNaN(due.getTime())) {
+            return; // Skip validation if any date is invalid
+        }
+
+        if (joinDate > payStart) {
             ctx.addIssue({
                 path: ["paymentStart"],
                 code: "custom",
@@ -57,7 +77,7 @@ const addDateValidation = (schema: typeof baseMemberSchema) =>
             });
         }
 
-        if (joiningDate && dueDate && joiningDate > dueDate) {
+        if (joinDate > due) {
             ctx.addIssue({
                 path: ["dueDate"],
                 code: "custom",
@@ -65,7 +85,7 @@ const addDateValidation = (schema: typeof baseMemberSchema) =>
             });
         }
 
-        if (paymentStart && dueDate && dueDate < paymentStart) {
+        if (due < payStart) {
             ctx.addIssue({
                 path: ["dueDate"],
                 code: "custom",
@@ -73,11 +93,17 @@ const addDateValidation = (schema: typeof baseMemberSchema) =>
             });
         }
     });
+};
 
+// Schema for creating new members
 export const newMemberSchema = addDateValidation(baseMemberSchema);
 
+// Schema for updating members (includes ID)
 export const updateMemberSchema = addDateValidation(
     baseMemberSchema.extend({
         id: z.number({ required_error: "ID is required" }).int().positive(),
     })
 );
+
+export type User = z.infer<typeof updateMemberSchema>;
+export type UserList = User[];

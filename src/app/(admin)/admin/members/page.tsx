@@ -3,30 +3,30 @@
 import React, { useContext } from "react";
 import dynamic from "next/dynamic";
 import { useUserList } from "@/hooks/useUserList";
-import UserTableShimmer from "@/components/admin/User/UserTableShimmer";
 import modalContext from "@/context/ModalContext";
 import { Button } from "@/components/ui/button";
 
 const UserForm = dynamic(() => import("@/components/admin/User/userForm"));
 
-const UserTable = dynamic(() => import("@/components/admin/User/userTable"), {
-  loading: () => <UserTableShimmer />,
-});
+const UserTable = dynamic(() => import("@/components/admin/User/userTable"));
 
 const DeleteConfirmModal = dynamic(
   () => import("@/components/admin/User/DeleteConfirmModal")
 );
 
 export default function Page() {
-  const { data, isLoading } = useUserList();
+  const { data, isLoading, isSuccess, isPending } = useUserList();
   const { setUserFormModal } = useContext(modalContext);
-
-  if (isLoading) {
-    return <UserTableShimmer />;
-  }
 
   return (
     <>
+      <div>
+        <h1 className="text-2xl font-bold">Members</h1>
+        <p className="text-muted-foreground">
+          Manage your gym members, add new members, and manage their
+          information.
+        </p>
+      </div>
       <Button
         className="w-36 cursor-pointer"
         onClick={() =>
@@ -38,7 +38,12 @@ export default function Page() {
       <UserForm />
       <DeleteConfirmModal />
       <div className="p-4 border-2 rounded-2xl">
-        <UserTable data={data} />
+        <UserTable
+          data={data}
+          isLoading={isLoading}
+          isSuccess={isSuccess}
+          isPending={isPending}
+        />
       </div>
     </>
   );

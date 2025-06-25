@@ -13,7 +13,12 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
+import {
+  ArrowUpDown,
+  ChevronDown,
+  Loader2,
+  MoreHorizontal,
+} from "lucide-react";
 import {
   addDays,
   differenceInCalendarDays,
@@ -41,25 +46,39 @@ import {
 } from "@/components/ui/table";
 import modalContext from "@/context/ModalContext";
 import Link from "next/link";
+import { newMemberSchema } from "@/lib/validation/memberSchema";
+import { z } from "zod";
 
-export type User = {
-  id: string;
-  name: string;
-  gender: "male" | "female" | "other"; // use union type for better safety
-  phone: string;
-  age: number;
-  height: number;
-  weight: number;
-  joiningDate: Date;
-  status: "active" | "inactive"; // assuming these are possible values
-  activePlan: string;
-  paymentStart: Date;
-  dueDate: Date;
-  createdAt: Date;
-  updatedAt: Date;
-};
+// export interface User {
+//   id: number;
+//   name: string;
+//   gender: "male" | "female" | "other";
+//   status: "active" | "inactive";
+//   phone: string;
+//   age: number;
+//   weight: number;
+//   height: number;
+//   joiningDate: Date;
+//   paymentStart: Date;
+//   dueDate: Date;
+//   planId: number;
+//   activePlan?: string;
+// }
 
-export default function Page({ data }: { data: User[] }) {
+type CreateFormData = z.infer<typeof newMemberSchema>;
+type User = CreateFormData & { id?: number };
+
+export default function Page({
+  data,
+  isLoading,
+  isSuccess,
+  isPending,
+}: {
+  data: User[];
+  isLoading: boolean;
+  isSuccess: boolean;
+  isPending: boolean;
+}) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -67,7 +86,7 @@ export default function Page({ data }: { data: User[] }) {
   const { setUserFormModal, setDeleteConfirmModal } = useContext(modalContext);
 
   const handleDeleteUser = useCallback(
-    (userId: string, userName: string) => {
+    (userId: number, userName: string) => {
       setDeleteConfirmModal({
         isOpen: true,
         userId,
@@ -257,7 +276,9 @@ export default function Page({ data }: { data: User[] }) {
                 Edit
               </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={() => handleDeleteUser(user.id, user.name)}
+                onClick={() =>
+                  user.id !== undefined && handleDeleteUser(user.id, user.name)
+                }
                 className="text-red-600 hover:text-red-700 cursor-pointer"
               >
                 Delete
@@ -270,7 +291,7 @@ export default function Page({ data }: { data: User[] }) {
   ];
 
   const table = useReactTable({
-    data,
+    data: isSuccess ? data : [],
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -347,7 +368,19 @@ export default function Page({ data }: { data: User[] }) {
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
+            {isLoading && isPending ? (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
+                  <Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" />
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Loading users...
+                  </p>
+                </TableCell>
+              </TableRow>
+            ) : isSuccess && table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}

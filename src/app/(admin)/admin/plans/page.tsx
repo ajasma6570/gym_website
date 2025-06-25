@@ -33,7 +33,7 @@ export default function PlanPage() {
       <div>
         <h1 className="text-2xl font-bold">Plans</h1>
         <p className="text-muted-foreground">
-          Manage your gym membership plans
+          Manage your gym plans, add new plans, and manage their information.
         </p>
       </div>
       <Button onClick={handleCreateNew} className="w-40">

@@ -40,14 +40,14 @@ export default function DeleteConfirmModal() {
 
   return (
     <Dialog open={deleteConfirmModal.isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Confirm Delete</DialogTitle>
         </DialogHeader>
 
         <div className="py-4">
           <p className="text-sm ">
-            Are you sure you want to delete user{" "}
+            Are you sure you want to permanently delete the user?
             <span className="font-semibold ">
               &quot;{deleteConfirmModal.userName} &quot;
             </span>

@@ -22,13 +22,13 @@ interface ModalContextType {
   >;
   deleteConfirmModal: {
     isOpen: boolean;
-    userId: string | null;
+    userId: number | null;
     userName: string | null;
   };
   setDeleteConfirmModal: React.Dispatch<
     React.SetStateAction<{
       isOpen: boolean;
-      userId: string | null;
+      userId: number | null;
       userName: string | null;
     }>
   >;
@@ -67,7 +67,7 @@ const modalContext = createContext<ModalContextType>({
   setUserFormModal: () => {},
   deleteConfirmModal: {
     isOpen: false,
-    userId: null as string | null,
+    userId: null as number | null,
     userName: null as string | null,
   },
   setDeleteConfirmModal: () => {},
@@ -94,7 +94,7 @@ export const ModalProvider = ({ children }: ModalProviderProps) => {
 
   const [deleteConfirmModal, setDeleteConfirmModal] = useState({
     isOpen: false,
-    userId: null as string | null,
+    userId: null as number | null,
     userName: null as string | null,
   });
 

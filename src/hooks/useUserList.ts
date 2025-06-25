@@ -1,5 +1,5 @@
 import { showToastMessage } from "@/lib/toast";
-import { newMemberSchema, updateMemberSchema } from "@/lib/zod";
+import { newMemberSchema, updateMemberSchema } from "@/lib/validation/memberSchema";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 
@@ -18,17 +18,18 @@ export const useUserList = () => {
 export const useUserCreate = () => {
     const query = useQueryClient();
     return useMutation({
-        mutationFn: async (newUser: z.infer<typeof newMemberSchema>) => {
+        mutationFn: async (data: z.infer<typeof newMemberSchema>) => {
             const response = await fetch("/api/member", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify(newUser),
+                body: JSON.stringify(data),
             });
 
             if (!response.ok) {
-                throw new Error("Failed to create user");
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Failed to create user");
             }
 
             return response.json();
@@ -39,7 +40,7 @@ export const useUserCreate = () => {
         },
         onError: (error) => {
             console.error("Error creating user:", error);
-            showToastMessage("Failed to create user", "error");
+            showToastMessage(error.message, "error");
         },
     });
 }
@@ -48,7 +49,6 @@ export const useUserUpdate = () => {
     const query = useQueryClient();
     return useMutation({
         mutationFn: async (updatedUser: z.infer<typeof updateMemberSchema> & { id: number }) => {
-            console.log("Updating user with data:", updatedUser);
             const response = await fetch(`/api/member/${updatedUser.id}`, {
                 method: "PUT",
                 headers: {
@@ -58,9 +58,8 @@ export const useUserUpdate = () => {
             });
 
             if (!response.ok) {
-                const errorData = await response.text();
-                console.error("API Error:", response.status, errorData);
-                throw new Error(`Failed to update user: ${response.status} ${errorData}`);
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Failed to create user");
             }
 
             return response.json();
@@ -71,7 +70,7 @@ export const useUserUpdate = () => {
         },
         onError: (error) => {
             console.error("Error updating user:", error);
-            showToastMessage("Failed to update user", "error");
+            showToastMessage(error.message, "error");
         },
     });
 };
@@ -79,7 +78,7 @@ export const useUserUpdate = () => {
 export const useUserDelete = () => {
     const query = useQueryClient();
     return useMutation({
-        mutationFn: async (userId: string) => {
+        mutationFn: async (userId: number) => {
             const response = await fetch(`/api/member/${userId}`, {
                 method: "DELETE",
                 headers: {
@@ -109,7 +108,7 @@ export const useUserDetails = (userId: string) => {
     return useQuery({
         queryKey: ["users", userId],
         queryFn: async () => {
-            const response = await fetch(`/api/users/${userId}`);
+            const response = await fetch(`/api/member/${userId}`);
             if (!response.ok) {
                 throw new Error("User not found");
             }

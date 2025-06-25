@@ -1,20 +1,22 @@
+import { object, string, coerce } from "zod";
+
+export const signInSchema = object({
+    username: string({ required_error: "Email is required" })
+        .min(1, "Email is required"),
+    password: string({ required_error: "Password is required" })
+        .min(1, "Password is required")
+        .min(3, "Password must be at least 6 characters long")
+        .max(20, "Password must be at most 20 characters long"),
+})
+
 import { z } from "zod";
 
-//
-// ─── MEMBER SCHEMA ──────────────────────────────────────────────────────────────
-//
-
-// Helper: Converts date strings (YYYY-MM-DD) to JS Date
-const dateString = z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
-    .transform((val) => new Date(val));
-
-// Base member schema without ID
+// Base schema without refinements
 const baseMemberSchema = z.object({
     name: z
         .string({ required_error: "Name is required" })
-        .min(2, "Name must be at least 2 characters"),
+        .min(2, "Name must be at least 2 characters")
+        .max(50, "Name must be at most 50 characters"),
 
     gender: z.enum(["male", "female", "other"], {
         required_error: "Gender is required",
@@ -43,20 +45,37 @@ const baseMemberSchema = z.object({
         .min(50, "Height must be at least 50 cm")
         .max(300, "Height must be realistic"),
 
-    joiningDate: dateString,
-    paymentStart: dateString,
-    dueDate: dateString,
+    joiningDate: z
+        .string({ required_error: "Joining date is required" })
+        .min(1, "Joining date is required")
+        .regex(/^\d{4}-\d{2}-\d{2}$/, "Joining date must be in YYYY-MM-DD format"),
 
-    planId: z.number().int().positive(),
-    status: z.boolean(),
+    activePlan: z
+        .string({ required_error: "Active plan is required" })
+        .min(1, "Please select a membership plan"),
+
+    paymentStart: z
+        .string({ required_error: "Payment start date is required" })
+        .min(1, "Payment start date is required")
+        .regex(/^\d{4}-\d{2}-\d{2}$/, "Payment start date must be in YYYY-MM-DD format"),
+
+    dueDate: z
+        .string({ required_error: "Due date is required" })
+        .min(1, "Due date is required")
+        .regex(/^\d{4}-\d{2}-\d{2}$/, "Due date must be in YYYY-MM-DD format"),
 });
 
-// Add date logic: joiningDate ≤ paymentStart ≤ dueDate
-const addDateValidation = (schema: typeof baseMemberSchema) =>
-    schema.superRefine((data, ctx) => {
+// Function to add date validation refinements
+const addDateValidation = (schema: typeof baseMemberSchema) => {
+    return schema.superRefine((data, ctx) => {
         const { joiningDate, paymentStart, dueDate } = data;
 
-        if (joiningDate && paymentStart && joiningDate > paymentStart) {
+        // Convert string dates to Date objects for comparison
+        const joinDate = new Date(joiningDate);
+        const payStart = new Date(paymentStart);
+        const due = new Date(dueDate);
+
+        if (joinDate > payStart) {
             ctx.addIssue({
                 path: ["paymentStart"],
                 code: "custom",
@@ -64,7 +83,7 @@ const addDateValidation = (schema: typeof baseMemberSchema) =>
             });
         }
 
-        if (joiningDate && dueDate && joiningDate > dueDate) {
+        if (joinDate > due) {
             ctx.addIssue({
                 path: ["dueDate"],
                 code: "custom",
@@ -72,7 +91,7 @@ const addDateValidation = (schema: typeof baseMemberSchema) =>
             });
         }
 
-        if (paymentStart && dueDate && dueDate < paymentStart) {
+        if (due < payStart) {
             ctx.addIssue({
                 path: ["dueDate"],
                 code: "custom",
@@ -80,57 +99,43 @@ const addDateValidation = (schema: typeof baseMemberSchema) =>
             });
         }
     });
+};
 
+// Schema for creating new members
 export const newMemberSchema = addDateValidation(baseMemberSchema);
 
+// Schema for updating members (includes ID)
 export const updateMemberSchema = addDateValidation(
     baseMemberSchema.extend({
-        id: z.number({ required_error: "ID is required" }).int().positive(),
+        id: z.string({ required_error: "ID is required" }).min(1, "ID is required"),
     })
 );
 
-//
-// ─── PLAN / MEMBERSHIP SCHEMA ────────────────────────────────────────────────────
-//
 
-export const basePlanSchema = z.object({
-    name: z
-        .string({ required_error: "Plan name is required" })
+// Base membership schema without ID for creation
+export const baseMembershipSchema = object({
+    name: string({ required_error: "Plan name is required" })
+        .min(1, "Plan name is required")
         .min(3, "Plan name must be at least 3 characters")
         .max(50, "Plan name must be at most 50 characters"),
-
-    duration: z
-        .number({ required_error: "Duration is required" })
-        .int("Duration must be a whole number")
-        .positive("Duration must be a positive number"),
-
-    amount: z
-        .number({ required_error: "Amount is required" })
-        .int("Amount must be an integer")
-        .positive("Amount must be a positive number"),
-
-    status: z.enum(["active", "inactive"], {
-        required_error: "Status is required",
-    }),
+    duration: coerce.number({ required_error: "Days is required" })
+        .int("Days must be a whole number"),
+    amount: coerce.number({ required_error: "Amount is required" })
+        .multipleOf(0.01, "Amount can have up to 2 decimal places"),
+    status: string({ required_error: "Status is required" })
+        .min(1, "Status is required")
+        .regex(/^(active|inactive)$/, "Status must be either 'active' or 'inactive'"),
 });
 
-export const createPlanSchema = basePlanSchema;
+// Schema for creating new membership (no ID required)
+export const createMembershipSchema = baseMembershipSchema;
 
-export const updatePlanSchema = basePlanSchema.extend({
-    id: z.number({ required_error: "ID is required" }).int().positive(),
+// Schema for updating membership (includes ID)
+export const updateMembershipSchema = baseMembershipSchema.extend({
+    id: coerce.number({ required_error: "ID is required" })
+        .int("ID must be an integer")
+        .positive("ID must be positive"),
 });
 
-//
-// ─── SIGN-IN SCHEMA ──────────────────────────────────────────────────────────────
-//
-
-export const signInSchema = z.object({
-    username: z
-        .string({ required_error: "Email is required" })
-        .min(1, "Email is required"),
-
-    password: z
-        .string({ required_error: "Password is required" })
-        .min(6, "Password must be at least 6 characters long")
-        .max(20, "Password must be at most 20 characters long"),
-});
+// Keep the old schema for backward compatibility
+export const newMembershipSchema = updateMembershipSchema;

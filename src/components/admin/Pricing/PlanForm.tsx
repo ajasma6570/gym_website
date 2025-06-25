@@ -69,12 +69,7 @@ export default function MembershipForm() {
         console.error("Form submission error:", error);
       }
     },
-    [
-      createPlan,
-      updatePlan,
-      membershipFormModal.mode,
-      membershipFormModal.membershipData,
-    ]
+    [createPlan, updatePlan, membershipFormModal.mode]
   );
 
   const handleModalClose = useCallback(() => {
