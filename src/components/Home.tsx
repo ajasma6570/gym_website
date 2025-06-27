@@ -69,7 +69,7 @@ export default function Home() {
         <div className="absolute inset-0 bg-black/40"></div>
 
         <div className="relative z-10 w-full">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-left">
+          <div className="max-w-7xl mx-auto px-10 sm:px-0  text-left">
             <h1 className="text-3xl md:text-6xl lg:text-6xl uppercase font-bold mb-6">
               Push harder today
             </h1>
