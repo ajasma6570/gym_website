@@ -3,6 +3,7 @@
 import { GiBiceps } from "react-icons/gi";
 import { RiTimerFlashLine } from "react-icons/ri";
 import { FaBicycle } from "react-icons/fa";
+import { FaBowlFood } from "react-icons/fa6";
 import Image from "next/image";
 import Map from "./Map";
 
@@ -20,7 +21,7 @@ const ChooseOurGym = [
       "We offer state-of-the-art fitness equipment to provide a safe and effective workout experience. Maintain perfect form and push your limits with confidence.",
   },
   {
-    icon: <GiBiceps className="h-16 w-16 text-red-600" />,
+    icon: <FaBowlFood className="h-14 w-14 text-red-600" />,
     title: "nutrition plan",
     description:
       "Fuel your fitness journey with personalized nutrition plans tailored to your body type and goals. Get expert guidance to complement your workouts.",
@@ -37,21 +38,21 @@ const trainers = [
   {
     name: "Power Rack",
     title: "Strength & Conditioning",
-    image: "/assets/eq_1.jpeg",
+    image: "/images/eq_1.webp",
     description:
       "Heavy-duty power rack with adjustable safety bars and pull-up bar, ideal for squats, bench press, and full-body strength workouts.",
   },
   {
     name: "Yoga Mats & Blocks",
     title: "Yoga & Flexibility",
-    image: "/assets/eq_2.jpeg",
+    image: "/images/eq_2.webp",
     description:
       "High-grip yoga mats and foam blocks for enhanced comfort, support, and alignment during stretching and flexibility routines.",
   },
   {
     name: "CrossFit Setup",
     title: "CrossFit & HIIT",
-    image: "/assets/eq_3.jpeg",
+    image: "/images/eq_3.webp",
     description:
       "Complete CrossFit station with battle ropes, plyo boxes, kettlebells, and medicine balls built for high-intensity circuits and endurance.",
   },
@@ -62,8 +63,7 @@ export default function Home() {
       <div
         className="relative h-screen bg-cover bg-center bg-no-repeat flex items-center"
         style={{
-          backgroundImage:
-            "url('/assets/cross-training-rope-swing-exercise.jpg')",
+          backgroundImage: "url('/images/rope-swing.webp')",
         }}
       >
         <div className="absolute inset-0 bg-black/40"></div>
@@ -71,32 +71,35 @@ export default function Home() {
         <div className="relative z-10 w-full">
           <div className="max-w-7xl mx-auto px-10 sm:px-0  text-left">
             <h1 className="text-3xl md:text-6xl lg:text-6xl uppercase font-bold mb-6">
-              Push harder today
+              Train with Purpose
             </h1>
             <p className="text-2xl md:text-4xl lg:text-5xl font-bold text-red-600 mb-6 uppercase">
               If You Want a Different
               <br /> Tomorrow
             </p>
             <p className="text-base text-white/90 mb-8 max-w-3xl">
-              Whether you&apos;re just starting your fitness journey or leveling
-              up your training, our gym is your home for strength,
-              transformation, and well-being.
+              Anatomy Family Fitness Centre in Nayarambalam, Vypin, Kochi offers
+              expert training, modern equipment, and personalized fitness plans
+              to help you get stronger
             </p>
-            <button className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-colors duration-200 shadow-lg">
+            <a
+              href="#"
+              className="inline-block bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-colors duration-200 shadow-lg"
+            >
               Start Your Journey
-            </button>
+            </a>
           </div>
         </div>
       </div>
 
-      <div className="py-16 ">
+      <div className="pt-24 pb-16 md:pb-0 ">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-xl md:text-2xl font-semibold mb-4 uppercase">
-              Push your limits forward
+              Why Choose Anatomy Gym in Kochi
             </h2>
             <p className="text-3xl lg:text-4xl text-red-600 max-w-2xl mx-auto font-extrabold">
-              Achieve amazing results <br /> with our services
+              Achieve Amazing Results with Our Fitness Programs
             </p>
           </div>
         </div>
@@ -121,7 +124,7 @@ export default function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full w-full">
           <div className="h-full w-full flex items-center justify-center">
             <Image
-              src="/assets/image4.jpg"
+              src="/images/image4.webp"
               alt="Cross Training Rope Swing Exercise"
               width={520}
               height={600}
@@ -131,14 +134,15 @@ export default function Home() {
           </div>
           <div className="h-full w-full flex flex-col justify-center items-start p-8 space-y-10">
             <h2 className="text-xl md:text-2xl font-semibold mb-4 uppercase text-white">
-              why choose us
+              Why Choose Anatomy Family Fitness Centre in Vypin
             </h2>
             <p className="text-2xl md:text-4xl lg:text-5xl font-bold text-red-600 mb-6 uppercase">
-              Our complex has the best trainers
+              Top Trainers & Best Gym Equipment in Kochi
             </p>
             <p>
-              Top-rated trainers, modern equipment, and custom fitness plans
-              make us your ultimate destination for health and wellness.
+              Located in Nayarambalam, Vypin – Anatomy Gym offers certified
+              personal training, advanced equipment, and custom workout plans to
+              help you reach peak performance.
             </p>
 
             <ul className="list-disc pl-5  text-xl space-y-2">
@@ -174,7 +178,7 @@ export default function Home() {
           </div>{" "}
           <div className="h-full w-full flex items-center justify-center">
             <Image
-              src="/assets/image5.jpg"
+              src="/images/image5.webp"
               alt="Cross Training Rope Swing Exercise"
               width={520}
               height={600}
@@ -189,10 +193,10 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-xl md:text-2xl font-semibold mb-4 uppercase text-white">
-              Meet Our Equipment
+              Gym Equipment at Anatomy Fitness - Nayarambalam , Vypin , Kochi
             </h2>
             <p className="text-3xl lg:text-4xl text-red-600 max-w-2xl mx-auto font-extrabold">
-              Top-Quality Machines <br /> Engineered for Performance and Safety
+              High-Performance Machines for Every Fitness Goal
             </p>
           </div>
 
@@ -213,10 +217,10 @@ export default function Home() {
                 </div>
                 <div className="p-6">
                   <h3 className="text-xl font-bold mb-2">{trainer.name}</h3>
-                  <p className="text-red-600 font-medium mb-3">
+                  <p className="text-red-500 font-bold mb-3 text-xl">
                     {trainer.title}
                   </p>
-                  <p className="text-neutral-400 text-sm">
+                  <p className="text-neutral-200 text-md">
                     {trainer.description}
                   </p>
                 </div>
@@ -239,15 +243,17 @@ export default function Home() {
       <div className=" pt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
           <div className="text-center">
-            <h2 className="text-xl md:text-2xl font-semibold mb-4 uppercase text-gray-400">
-              Find Us
+            <h2 className="text-xl md:text-2xl font-semibold mb-4 uppercase ">
+              Gym Location - Nayarambalam, Vypin
             </h2>
             <p className="text-3xl lg:text-4xl text-red-600 max-w-2xl mx-auto font-extrabold mb-4">
-              Visit Our Location
+              Visit Our Gym in Kochi
             </p>
-            <p className="text-gray-300 max-w-2xl mx-auto">
-              Located in the heart of the city with easy access and ample
-              parking. Come visit us today for a tour of our facilities!
+            <p className="text-gray-300 max-w-4xl  mx-auto">
+              Anatomy Family Fitness Centre is conveniently located in
+              Nayarambalam, Vypin, Kochi. Easily accessible from all major areas
+              with ample parking and modern facilities. Book a tour and see why
+              we’re the best gym near you!
             </p>
           </div>
         </div>

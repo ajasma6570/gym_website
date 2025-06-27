@@ -1,20 +1,19 @@
 "use client";
 
 import { FaPhone, FaMapMarkerAlt, FaEnvelope, FaClock } from "react-icons/fa";
-import { FaFacebookF, FaTwitter, FaInstagram, FaYoutube } from "react-icons/fa";
-import Link from "next/link";
+import { FaInstagram } from "react-icons/fa";
 
 export default function Footer() {
   return (
     <footer className="bg-black  text-white">
       {/* Main Footer Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="flex flex-col md:flex-row justify-between gap-8">
           {/* Gym Info Section */}
-          <div className="space-y-6">
+          <div className="space-y-6 w-1/2">
             <div>
               <h3 className="text-2xl font-bold text-red-600 mb-4">
-            Anatomy Gym
+                Anatomy Gym
               </h3>
               <p className="text-gray-300 leading-relaxed">
                 Transform your body and mind with our state-of-the-art facility
@@ -26,40 +25,42 @@ export default function Footer() {
             <div>
               <h4 className="text-lg font-semibold mb-4">Follow Us</h4>
               <div className="flex space-x-4">
-                <a
+                {/* <a
                   href="#"
                   className="bg-red-600 hover:bg-red-700 p-3 rounded-full transition-colors duration-200"
                   aria-label="Facebook"
                 >
                   <FaFacebookF className="w-4 h-4" />
-                </a>
+                </a> */}
                 <a
-                  href="#"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href="https://www.instagram.com/anatomy_family_fitness_center?igsh=MWljOHR5dnhvNGh0bA=="
                   className="bg-red-600 hover:bg-red-700 p-3 rounded-full transition-colors duration-200"
                   aria-label="Instagram"
                 >
                   <FaInstagram className="w-4 h-4" />
                 </a>
-                <a
+                {/* <a
                   href="#"
                   className="bg-red-600 hover:bg-red-700 p-3 rounded-full transition-colors duration-200"
                   aria-label="Twitter"
                 >
                   <FaTwitter className="w-4 h-4" />
-                </a>
-                <a
+                </a> */}
+                {/* <a
                   href="#"
                   className="bg-red-600 hover:bg-red-700 p-3 rounded-full transition-colors duration-200"
                   aria-label="YouTube"
                 >
                   <FaYoutube className="w-4 h-4" />
-                </a>
+                </a> */}
               </div>
             </div>
           </div>
 
           {/* Quick Links */}
-          <div className="space-y-6">
+          {/* <div className="space-y-6">
             <h4 className="text-lg font-semibold">Quick Links</h4>
             <ul className="space-y-3">
               <li>
@@ -111,10 +112,10 @@ export default function Footer() {
                 </a>
               </li>
             </ul>
-          </div>
+          </div> */}
 
           {/* Services */}
-          <div className="space-y-6">
+          {/* <div className="space-y-6">
             <h4 className="text-lg font-semibold">Our Services</h4>
             <ul className="space-y-3">
               <li className="text-gray-300">Strength Training</li>
@@ -124,7 +125,7 @@ export default function Footer() {
               <li className="text-gray-300">Nutrition Consulting</li>
               <li className="text-gray-300">Group Classes</li>
             </ul>
-          </div>
+          </div> */}
 
           {/* Contact Info */}
           <div className="space-y-6">
@@ -134,9 +135,9 @@ export default function Footer() {
                 <FaMapMarkerAlt className="text-red-600 mt-1 flex-shrink-0" />
                 <div>
                   <p className="text-gray-300">
-                    123 Fitness Street
+                    36G6+JF5, Nayarambalam,
                     <br />
-                    Gym City, GC 12345
+                    Vypin, Kochi, Kerala 682509
                   </p>
                 </div>
               </div>

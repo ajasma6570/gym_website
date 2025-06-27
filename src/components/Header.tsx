@@ -62,7 +62,7 @@ const Header = () => {
           <div className="flex-shrink-0">
             <Link href="/" className="flex items-center space-x-2">
               <Image
-                src="/assets/logo_anatomy1.png"
+                src="/images/logo-bg-none.webp"
                 alt="Logo"
                 width={isSmallScreen ? 150 : isScrolled ? 150 : 150}
                 height={isSmallScreen ? 100 : isScrolled ? 100 : 150}

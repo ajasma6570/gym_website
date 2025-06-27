@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ui/theme-provider";
+import { icons, getOpenGraphData } from "@/lib/meta";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,8 +15,14 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Gym Website",
-  description: "A simple gym website built with Next.js",
+  title: "Anatomy Family Fitness Centre",
+  description:
+    "Top-rated gym in Nayarambalam, Vypin, Kochi. Anatomy Family Fitness Centre offers personal training, group workouts, and modern fitness equipment.",
+  icons,
+  openGraph: getOpenGraphData(),
+  alternates: {
+    canonical: "https://www.anatomy.in/",
+  },
 };
 
 export default function RootLayout({
