@@ -32,6 +32,7 @@ model Plan {
   name      String     @unique
   duration  Int
   amount    Float
+  type      PlanType   @default(membership_plan)
   status    PlanStatus @default(active)
   isDeleted Boolean    @default(false)
   deletedAt DateTime?
@@ -65,4 +66,9 @@ enum Gender {
 enum PlanStatus {
   active
   inactive
+}
+
+enum PlanType {
+  membership_plan
+  personal_training
 }

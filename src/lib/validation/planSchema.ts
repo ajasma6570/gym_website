@@ -16,6 +16,10 @@ export const basePlanSchema = z.object({
         .int("Amount must be an integer")
         .positive("Amount must be a positive number"),
 
+    type: z.enum(["membership_plan", "personal_training"], {
+        required_error: "Plan type is required",
+    }),
+
     status: z.enum(["active", "inactive"], {
         required_error: "Status is required",
     }),

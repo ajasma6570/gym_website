@@ -48,6 +48,7 @@ export default function MembershipForm() {
       name: "",
       duration: 0,
       amount: 0,
+      type: "membership_plan",
       status: "active",
     },
   });
@@ -97,6 +98,7 @@ export default function MembershipForm() {
         name: data.name || "",
         duration: data.duration || 0,
         amount: data.amount || 0,
+        type: data.type || "membership_plan",
         status: data.status || "active",
       });
     } else {
@@ -104,6 +106,7 @@ export default function MembershipForm() {
         name: "",
         duration: 0,
         amount: 0,
+        type: "membership_plan",
         status: "active",
       });
     }
@@ -121,9 +124,7 @@ export default function MembershipForm() {
   }, [isSuccess, handleModalClose]);
 
   const dialogTitle =
-    membershipFormModal.mode === "edit"
-      ? "Edit Membership Plan"
-      : "New Membership Plan";
+    membershipFormModal.mode === "edit" ? "Edit Plan" : "Create Plan";
   const buttonText = membershipFormModal.mode === "edit" ? "Update" : "Create";
 
   return (
@@ -145,8 +146,8 @@ export default function MembershipForm() {
             })}
             className="flex flex-col flex-1 min-h-0"
           >
-            <div className="flex-1 overflow-y-auto px-1">
-              <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-6 mt-2">
+            <div className="flex-1 overflow-y-auto px-1 space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-6">
                 <Form.FormField
                   name="name"
                   control={form.control}
@@ -179,6 +180,36 @@ export default function MembershipForm() {
                             )
                           }
                         />
+                      </Form.FormControl>
+                      <Form.FormMessage />
+                    </Form.FormItem>
+                  )}
+                />
+              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-3 items-center gap-6 ">
+                <Form.FormField
+                  name="type"
+                  control={form.control}
+                  render={({ field }) => (
+                    <Form.FormItem>
+                      <Form.FormLabel>Plan Type</Form.FormLabel>
+                      <Form.FormControl>
+                        <SelectField.Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <SelectField.SelectTrigger className="w-full">
+                            <SelectField.SelectValue placeholder="Select plan type" />
+                          </SelectField.SelectTrigger>
+                          <SelectField.SelectContent>
+                            <SelectField.SelectItem value="membership_plan">
+                              Membership Plan
+                            </SelectField.SelectItem>
+                            <SelectField.SelectItem value="personal_training">
+                              Personal Training
+                            </SelectField.SelectItem>
+                          </SelectField.SelectContent>
+                        </SelectField.Select>
                       </Form.FormControl>
                       <Form.FormMessage />
                     </Form.FormItem>

@@ -33,7 +33,8 @@ export default function PlanPage() {
       <div>
         <h1 className="text-2xl font-bold">Plans</h1>
         <p className="text-muted-foreground">
-          Manage your gym plans, add new plans, and manage their information.
+          Create and manage your membership and personal training plans here.
+          You can add, edit, or delete plans as needed.
         </p>
       </div>
       <Button onClick={handleCreateNew} className="w-40">
@@ -42,6 +43,19 @@ export default function PlanPage() {
 
       <div className="p-4 border-2 rounded-2xl">
         <PricingTable
+          title="Membership Plans"
+          type="membership_plan"
+          data={data}
+          isLoading={isLoading}
+          isSuccess={isSuccess}
+          isPending={isPending}
+        />
+      </div>
+
+      <div className="p-4 border-2 rounded-2xl">
+        <PricingTable
+          title="Personal Training Plans"
+          type="personal_training"
           data={data}
           isLoading={isLoading}
           isSuccess={isSuccess}

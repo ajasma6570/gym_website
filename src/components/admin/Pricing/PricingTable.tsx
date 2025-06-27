@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useContext, useCallback } from "react";
+import React, { useState, useContext, useCallback, useMemo } from "react";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -42,11 +42,15 @@ import {
 } from "@/components/ui/table";
 
 export default function Page({
+  title,
+  type,
   data,
   isLoading,
   isSuccess,
   isPending,
 }: {
+  title: string;
+  type: "membership_plan" | "personal_training";
   data: PlanList;
   isLoading: boolean;
   isSuccess: boolean;
@@ -69,6 +73,12 @@ export default function Page({
     },
     [setPlanDeleteConfirmModal]
   );
+
+  // Memoize the filtered data to prevent infinite re-renders
+  const filteredData = useMemo(() => {
+    if (!isSuccess || !data) return [];
+    return data.filter((plan) => plan.type === type);
+  }, [data, type, isSuccess]);
 
   const columns: ColumnDef<Plan>[] = [
     {
@@ -201,7 +211,7 @@ export default function Page({
   ];
 
   const table = useReactTable({
-    data: isSuccess ? data : [],
+    data: filteredData,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -221,6 +231,9 @@ export default function Page({
 
   return (
     <div className="w-full">
+      <div>
+        <h1 className="text-2xl font-bold">{title}</h1>
+      </div>
       <div className="flex items-center py-4">
         <Input
           placeholder="Filter Name"
