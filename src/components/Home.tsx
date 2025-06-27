@@ -60,16 +60,22 @@ const trainers = [
 export default function Home() {
   return (
     <div className="min-h-screen">
-      <div
-        className="relative h-screen bg-cover bg-center bg-no-repeat flex items-center"
-        style={{
-          backgroundImage: "url('/images/rope-swing.webp')",
-        }}
-      >
-        <div className="absolute inset-0 bg-black/40"></div>
+      <div className="relative h-screen flex items-center justify-center overflow-hidden">
+        <Image
+          src="/images/rope-swing.webp"
+          alt="Man training with rope swing"
+          fill
+          priority
+          fetchPriority="high"
+          className="object-cover object-center z-0"
+        />
 
-        <div className="relative z-10 w-full">
-          <div className="max-w-7xl mx-auto px-10 sm:px-0  text-left">
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-black/40 z-10"></div>
+
+        {/* Foreground Content */}
+        <div className="relative z-20 w-full">
+          <div className="max-w-7xl mx-auto px-10 sm:px-0 text-left">
             <h1 className="text-3xl md:text-6xl lg:text-6xl uppercase font-bold mb-6">
               Train with Purpose
             </h1>
@@ -124,6 +130,8 @@ export default function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full w-full">
           <div className="h-full w-full flex items-center justify-center">
             <Image
+              priority
+              fetchPriority="high"
               src="/images/image4.webp"
               alt="Cross Training Rope Swing Exercise"
               width={520}
@@ -178,6 +186,8 @@ export default function Home() {
           </div>{" "}
           <div className="h-full w-full flex items-center justify-center">
             <Image
+              priority
+              fetchPriority="high"
               src="/images/image5.webp"
               alt="Cross Training Rope Swing Exercise"
               width={520}
@@ -208,6 +218,8 @@ export default function Home() {
               >
                 <div className="h-64 bg-gray-300 flex items-center justify-center">
                   <Image
+                    priority
+                    fetchPriority="high"
                     src={trainer.image}
                     alt="Trainer 1"
                     width={300}
