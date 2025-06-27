@@ -56,6 +56,16 @@ interface ModalContextType {
       membershipData: any;
     }>
   >;
+  paymentFormModal: {
+    isOpen: boolean;
+    memberData: any;
+  };
+  setPaymentFormModal: React.Dispatch<
+    React.SetStateAction<{
+      isOpen: boolean;
+      memberData: any;
+    }>
+  >;
 }
 
 const modalContext = createContext<ModalContextType>({
@@ -83,6 +93,11 @@ const modalContext = createContext<ModalContextType>({
     membershipData: null,
   },
   setMembershipFormModal: () => {},
+  paymentFormModal: {
+    isOpen: false,
+    memberData: null,
+  },
+  setPaymentFormModal: () => {},
 });
 
 export const ModalProvider = ({ children }: ModalProviderProps) => {
@@ -110,6 +125,11 @@ export const ModalProvider = ({ children }: ModalProviderProps) => {
     membershipData: null,
   });
 
+  const [paymentFormModal, setPaymentFormModal] = useState({
+    isOpen: false,
+    memberData: null,
+  });
+
   return (
     <modalContext.Provider
       value={{
@@ -121,6 +141,8 @@ export const ModalProvider = ({ children }: ModalProviderProps) => {
         setPlanDeleteConfirmModal,
         membershipFormModal,
         setMembershipFormModal,
+        paymentFormModal,
+        setPaymentFormModal,
       }}
     >
       {children}

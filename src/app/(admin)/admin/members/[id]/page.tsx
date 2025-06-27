@@ -4,12 +4,29 @@ import { useUserDetails } from "@/hooks/useUserList";
 import { useParams } from "next/navigation";
 import { format } from "date-fns";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Loader2, CreditCard } from "lucide-react";
+import { useContext } from "react";
+import modalContext from "@/context/ModalContext";
+import dynamic from "next/dynamic";
+
+// Dynamically import the payment modal
+const PaymentModal = dynamic(
+  () => import("@/components/admin/Payment/PaymentModal")
+);
 
 export default function MemberPage() {
   const params = useParams();
   const id = params?.id as string;
   const { data: user, isLoading } = useUserDetails(id);
+  const { setPaymentFormModal } = useContext(modalContext);
+
+  const handleAddPayment = () => {
+    setPaymentFormModal({
+      isOpen: true,
+      memberData: user,
+    });
+  };
 
   return (
     <>
@@ -23,12 +40,23 @@ export default function MemberPage() {
           <p className="text-red-500">Member not found</p>
         </div>
       ) : (
-        <div className="  rounded-xl  space-y-4 ">
-          <h2 className="text-2xl font-semibold  pb-2 mb-4">Member Details</h2>
+        <div className="rounded-xl space-y-4">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-semibold pb-2">Member Details</h2>
+            <Button
+              onClick={handleAddPayment}
+              className="flex items-center gap-2"
+            >
+              <CreditCard className="h-4 w-4" />
+              Add Payment
+            </Button>
+          </div>
+
           <Avatar className="w-24 h-24 mb-4">
             <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
             <AvatarFallback>CN</AvatarFallback>
           </Avatar>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Detail label="Name" value={user.name} />
             <Detail label="Gender" value={user.gender} />
@@ -63,6 +91,9 @@ export default function MemberPage() {
               value={format(new Date(user.updatedAt), "dd MMM yyyy, HH:mm")}
             />
           </div>
+
+          {/* Payment Modal */}
+          <PaymentModal />
         </div>
       )}
     </>
