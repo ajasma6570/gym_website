@@ -15,13 +15,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Form,
   FormControl,
   FormField,
@@ -30,11 +23,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useUserCreate, useUserUpdate } from "@/hooks/useUserList";
-import { usePlanList } from "@/hooks/usePlan";
 import modalContext from "@/context/ModalContext";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Plan } from "@/lib/validation/planSchema";
 
 type CreateFormData = z.infer<typeof newMemberSchema>;
 type FormData = CreateFormData & { id?: number };
@@ -53,7 +44,6 @@ export default function UserForm() {
     reset: resetUpdate,
   } = useUserUpdate();
   const { userFormModal, setUserFormModal } = useContext(modalContext);
-  const { data: plans = [], isLoading: plansLoading } = usePlanList();
 
   // Check if either create or update was successful
   const isSuccess = isCreateSuccess || isUpdateSuccess;
@@ -69,9 +59,6 @@ export default function UserForm() {
       weight: 0,
       height: 0,
       joiningDate: "",
-      activePlan: "",
-      paymentStart: "",
-      dueDate: "",
     },
   });
 
@@ -80,7 +67,7 @@ export default function UserForm() {
     async (values: FormData) => {
       try {
         console.log("Form values:", values);
-        console.log("Modal mode:", userFormModal.mode);
+        console.log("Modal mode:", userFormModal);
 
         // Convert string values to numbers for numeric fields
         const formattedValues = {
@@ -91,13 +78,9 @@ export default function UserForm() {
           weight: Number(values.weight),
           height: Number(values.height),
           joiningDate: values.joiningDate,
-          paymentStart: values.paymentStart,
-          dueDate: values.dueDate,
-          activePlan: values.activePlan, // Keep as activePlan for Zod schema compatibility
         };
 
         if (userFormModal.mode === "edit") {
-          // For edit mode, include the user ID
           const updateData = {
             ...formattedValues,
             id: userFormModal.userData?.id,
@@ -113,58 +96,8 @@ export default function UserForm() {
         console.error("Form submission error:", error);
       }
     },
-    [createUser, updateUser, userFormModal.mode, userFormModal.userData]
+    [createUser, updateUser, userFormModal]
   );
-
-  // Function to calculate due date based on payment start and selected plan
-  const calculateDueDate = useCallback(
-    (paymentStartDate: string, planId: number) => {
-      console.log("calculateDueDate called with:", {
-        paymentStartDate,
-        planId,
-        plans,
-      });
-      if (!paymentStartDate || !planId || !plans.length) return "";
-
-      const selectedPlan = plans.find((plan: Plan) => plan.id === planId);
-      if (!selectedPlan) return "";
-
-      const startDate = new Date(paymentStartDate);
-      const dueDate = new Date(startDate);
-      dueDate.setDate(startDate.getDate() + selectedPlan.duration);
-
-      return dueDate.toISOString().split("T")[0];
-    },
-    [plans]
-  );
-
-  // Watch for changes in activePlan and paymentStart to auto-calculate dueDate
-  const watchedActivePlan = form.watch("activePlan");
-  const watchedPaymentStart = form.watch("paymentStart");
-  const watchedJoiningDate = form.watch("joiningDate");
-
-  // Auto-calculate due date when plan or payment start changes
-  useEffect(() => {
-    if (watchedActivePlan && watchedPaymentStart) {
-      const newDueDate = calculateDueDate(
-        watchedPaymentStart,
-        Number(watchedActivePlan)
-      );
-
-      const currentDueDate = form.getValues("dueDate");
-
-      if (newDueDate && newDueDate !== currentDueDate) {
-        form.setValue("dueDate", newDueDate);
-      }
-    }
-  }, [watchedActivePlan, watchedPaymentStart, calculateDueDate, form]);
-
-  // Auto-set payment start to joining date when plan is selected (if payment start is empty)
-  useEffect(() => {
-    if (watchedActivePlan && watchedJoiningDate && !watchedPaymentStart) {
-      form.setValue("paymentStart", watchedJoiningDate);
-    }
-  }, [watchedActivePlan, watchedJoiningDate, watchedPaymentStart, form]);
 
   const handleModalClose = useCallback(() => {
     // Prevent closing if operation is pending
@@ -198,16 +131,13 @@ export default function UserForm() {
         joiningDate: data.joiningDate
           ? new Date(data.joiningDate).toISOString().split("T")[0]
           : "",
-        activePlan: String(data.planId || data.activePlan || ""), // Convert planId to string for form
-        paymentStart: data.paymentStart
-          ? new Date(data.paymentStart).toISOString().split("T")[0]
-          : "",
-        dueDate: data.dueDate
-          ? new Date(data.dueDate).toISOString().split("T")[0]
-          : "",
       });
     } else {
-      const today = new Date().toISOString().split("T")[0];
+      const now = new Date();
+      const istOffset = now.getTimezoneOffset() * 60000;
+      const today = new Date(now.getTime() - istOffset)
+        .toISOString()
+        .split("T")[0];
 
       form.reset({
         name: "",
@@ -217,9 +147,6 @@ export default function UserForm() {
         weight: 0,
         height: 0,
         joiningDate: today,
-        activePlan: "",
-        paymentStart: "",
-        dueDate: "",
       });
     }
   }, [userFormModal.isOpen, userFormModal.mode, userFormModal.userData, form]);
@@ -402,124 +329,6 @@ export default function UserForm() {
                         <Input
                           type="date"
                           placeholder="Enter your joining date"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  name="activePlan"
-                  control={form.control}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Choose Plan</FormLabel>
-                      <FormControl>
-                        <Select
-                          onValueChange={(value) => {
-                            field.onChange(value);
-
-                            // Auto-set payment start to joining date if not already set
-                            const paymentStart = form.getValues("paymentStart");
-                            const joiningDate = form.getValues("joiningDate");
-
-                            if (!paymentStart && joiningDate) {
-                              form.setValue("paymentStart", joiningDate);
-                            }
-
-                            // Auto-calculate due date if payment start is available
-                            const currentPaymentStart =
-                              paymentStart || joiningDate;
-                            if (currentPaymentStart) {
-                              const newDueDate = calculateDueDate(
-                                currentPaymentStart,
-                                Number(value)
-                              );
-                              if (newDueDate) {
-                                form.setValue("dueDate", newDueDate);
-                              }
-                            }
-                          }}
-                          value={field.value ?? ""}
-                          disabled={plansLoading}
-                        >
-                          <SelectTrigger className="w-full">
-                            <SelectValue
-                              placeholder={
-                                plansLoading
-                                  ? "Loading plans..."
-                                  : plans.filter(
-                                      (plan: Plan) => plan.status === "active"
-                                    ).length === 0
-                                  ? "No plans available. Create a plan."
-                                  : "Select a plan"
-                              }
-                            />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {plans
-                              .filter((plan: Plan) => plan.status === "active")
-                              .map((plan: Plan) => (
-                                <SelectItem
-                                  key={plan.id}
-                                  value={String(plan.id)}
-                                >
-                                  {plan.name} - ₹{plan.amount} ({plan.duration}{" "}
-                                  days)
-                                </SelectItem>
-                              ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  name="paymentStart"
-                  control={form.control}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Payment Start Date</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="date"
-                          placeholder="Select payment start date"
-                          {...field}
-                          onChange={(e) => {
-                            field.onChange(e);
-                            // Auto-calculate due date if plan is already selected
-                            const activePlan = form.getValues("activePlan");
-                            if (activePlan && e.target.value) {
-                              const newDueDate = calculateDueDate(
-                                e.target.value,
-                                Number(activePlan)
-                              );
-                              if (newDueDate) {
-                                form.setValue("dueDate", newDueDate);
-                              }
-                            }
-                          }}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  name="dueDate"
-                  control={form.control}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Due Date</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="date"
-                          placeholder="Select due date"
                           {...field}
                         />
                       </FormControl>

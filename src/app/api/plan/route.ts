@@ -20,24 +20,31 @@ export async function GET() {
 }
 
 // POST: Create a new plan
+
 export async function POST(request: Request) {
-
   const body = await request.json();
-
-  const existingPlan = await prisma.plan.findFirst({
-    where: { name: body.name },
-  });
-
-  if (existingPlan) {
-    return NextResponse.json(
-      { error: "Plan with this name already exists" },
-      { status: 400 }
-    );
-  }
+  const { name, duration, amount, type, status } = body;
 
   try {
+    const existingPlan = await prisma.plan.findFirst({
+      where: { name },
+    });
+
+    if (existingPlan) {
+      return NextResponse.json(
+        { error: "Plan with this name already exists" },
+        { status: 400 }
+      );
+    }
+
     const plan = await prisma.plan.create({
-      data: body,
+      data: {
+        name,
+        duration,
+        amount,
+        type,
+        status,
+      },
     });
 
     return NextResponse.json(plan, { status: 201 });

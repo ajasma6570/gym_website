@@ -19,14 +19,8 @@ import {
   Loader2,
   MoreHorizontal,
 } from "lucide-react";
-import {
-  addDays,
-  differenceInCalendarDays,
-  format,
-  formatDistanceToNow,
-} from "date-fns";
+import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-// import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -46,27 +40,9 @@ import {
 } from "@/components/ui/table";
 import modalContext from "@/context/ModalContext";
 import Link from "next/link";
-import { newMemberSchema } from "@/lib/validation/memberSchema";
-import { z } from "zod";
+import { Member } from "@/types";
 
-// export interface User {
-//   id: number;
-//   name: string;
-//   gender: "male" | "female" | "other";
-//   status: "active" | "inactive";
-//   phone: string;
-//   age: number;
-//   weight: number;
-//   height: number;
-//   joiningDate: Date;
-//   paymentStart: Date;
-//   dueDate: Date;
-//   planId: number;
-//   activePlan?: string;
-// }
-
-type CreateFormData = z.infer<typeof newMemberSchema>;
-type User = CreateFormData & { id?: number };
+type User = Member;
 
 export default function Page({
   data,
@@ -84,7 +60,8 @@ export default function Page({
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
   const [globalFilter, setGlobalFilter] = useState("");
-  const { setUserFormModal, setDeleteConfirmModal } = useContext(modalContext);
+  const { setUserFormModal, setDeleteConfirmModal, setPaymentFormModal } =
+    useContext(modalContext);
 
   const handleDeleteUser = useCallback(
     (userId: number, userName: string) => {
@@ -97,34 +74,43 @@ export default function Page({
     [setDeleteConfirmModal]
   );
 
+  const handlePayNow = useCallback(
+    (user: User) => {
+      setPaymentFormModal({
+        isOpen: true,
+        memberData: user,
+      });
+    },
+    [setPaymentFormModal]
+  );
+
+  // Function to check if user has an active plan
+  const checkUserStatus = useCallback(
+    (user: Member): "active" | "inactive" | "expired" => {
+      // If user has no active plan, return inactive
+      if (!user.activePlan || !user.activePlan.dueDate) {
+        return "inactive";
+      }
+
+      // Check if the plan is expired
+      const dueDate = new Date(user.activePlan.dueDate);
+      const now = new Date();
+
+      // Set time to start of day for accurate comparison
+      dueDate.setHours(23, 59, 59, 999); // End of due date
+      now.setHours(0, 0, 0, 0); // Start of current day
+
+      return dueDate >= now ? "active" : "expired";
+    },
+    []
+  );
+
   // Memoize the table data to prevent infinite re-renders
   const tableData = useMemo(() => {
     return isSuccess && data ? data : [];
   }, [data, isSuccess]);
 
   const columns: ColumnDef<User>[] = [
-    // {
-    //   id: "select",
-    //   header: ({ table }) => (
-    //     <Checkbox
-    //       checked={
-    //         table.getIsAllPageRowsSelected() ||
-    //         (table.getIsSomePageRowsSelected() && "indeterminate")
-    //       }
-    //       onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-    //       aria-label="Select all"
-    //     />
-    //   ),
-    //   cell: ({ row }) => (
-    //     <Checkbox
-    //       checked={row.getIsSelected()}
-    //       onCheckedChange={(value) => row.toggleSelected(!!value)}
-    //       aria-label="Select row"
-    //     />
-    //   ),
-    //   enableSorting: false,
-    //   enableHiding: false,
-    // },
     {
       id: "serial",
       header: "S.No",
@@ -168,20 +154,15 @@ export default function Page({
         );
       },
       cell: ({ row }) => {
-        const rawStatus = row.getValue("status");
-        const status =
-          typeof rawStatus === "boolean"
-            ? rawStatus
-              ? "active"
-              : "inactive"
-            : String(rawStatus).toLowerCase();
+        const user = row.original;
+        const status = checkUserStatus(user);
 
         const getColor = () => {
           switch (status.toLowerCase()) {
             case "active":
               return "text-green-600";
             case "inactive":
-              return "text-orange-500";
+              return "text-gray-500";
             case "expired":
               return "text-red-600";
             default:
@@ -202,55 +183,118 @@ export default function Page({
 
     {
       accessorKey: "activePlan",
-      header: "Active plan",
-      cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("activePlan")}</div>
-      ),
-    },
-    {
-      accessorKey: "dueDate",
-      header: "Due Date",
-      cell: ({ row }) => (
-        <div className="lowercase">
-          {format(row.getValue("dueDate"), "dd-MM-yyyy")}
-        </div>
-      ),
-    },
-    {
-      id: "expiryStatus",
-      header: "Expiry Status",
+      header: "Active Plan",
       cell: ({ row }) => {
-        const paymentStartStr = row.original.paymentStart;
-        const dueDateStr = row.original.dueDate;
+        const user = row.original;
+        const activePlan = user.activePlan;
 
-        if (!paymentStartStr || !dueDateStr) {
-          return <div className="text-gray-500">No date info</div>;
+        if (!activePlan || !activePlan.plan) {
+          return <div className="text-gray-500">No active plan</div>;
         }
 
-        const dueDate = new Date(dueDateStr);
+        return <div className="capitalize">{activePlan.plan.name}</div>;
+      },
+    },
+
+    {
+      id: "expiryStatus",
+      header: "Plan Status",
+      cell: ({ row }) => {
+        const user = row.original;
+        const activePlan = user.activePlan;
+
+        if (!activePlan || !activePlan.dueDate) {
+          return <div className="text-gray-500">No plan</div>;
+        }
+
+        const dueDate = new Date(activePlan.dueDate);
         const now = new Date();
 
-        const daysLeft = differenceInCalendarDays(dueDate, now);
+        // Calculate days difference
+        const timeDiff = dueDate.getTime() - now.getTime();
+        const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
 
         let colorClass = "";
         let message = "";
 
-        if (daysLeft < 0) {
+        if (daysDiff < 0) {
           colorClass = "text-red-600";
-          message = `Expired ${formatDistanceToNow(dueDate, {
-            addSuffix: true,
-          })}`;
-        } else if (daysLeft <= 7) {
+          message = `Expired ${Math.abs(daysDiff)} days ago`;
+        } else if (daysDiff === 0) {
           colorClass = "text-orange-500";
-          message = `${daysLeft} days left (Expiring soon)`;
+          message = "Expires today";
+        } else if (daysDiff <= 7) {
+          colorClass = "text-orange-500";
+          message = `Expires in ${daysDiff} day${daysDiff === 1 ? "" : "s"}`;
         } else {
           colorClass = "text-green-600";
-          message = `${daysLeft} days left (Valid)`;
+          message = `Valid for ${daysDiff} days`;
         }
 
-        return <div className={colorClass}>{message}</div>;
+        return (
+          <div className={`${colorClass} font-medium text-sm`}>
+            {message}
+            <div className="text-sm text-neutral-500 mt-1">
+              Due: {format(dueDate, "dd-MM-yyyy")}
+            </div>
+          </div>
+        );
       },
     },
+
+    {
+      id: "personalTraining",
+      header: "Personal Training",
+      cell: ({ row }) => {
+        const user = row.original;
+
+        // Check if user has any personal training plans in their history
+        const personalTrainingPlan = user.planHistories?.find(
+          (planHistory) => planHistory.plan?.type === "personal_training"
+        );
+
+        if (!personalTrainingPlan) {
+          return <div className="text-gray-500">No PT plan</div>;
+        }
+
+        const dueDate = new Date(personalTrainingPlan.dueDate);
+        const now = new Date();
+
+        // Calculate days difference
+        const timeDiff = dueDate.getTime() - now.getTime();
+        const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+        let colorClass = "";
+        let message = "";
+
+        if (daysDiff < 0) {
+          colorClass = "text-red-600";
+          message = `Expired ${Math.abs(daysDiff)} days ago`;
+        } else if (daysDiff === 0) {
+          colorClass = "text-orange-500";
+          message = "Expires today";
+        } else if (daysDiff <= 7) {
+          colorClass = "text-orange-500";
+          message = `Expires in ${daysDiff} day${daysDiff === 1 ? "" : "s"}`;
+        } else {
+          colorClass = "text-green-600";
+          message = `Valid for ${daysDiff} days`;
+        }
+
+        return (
+          <div className={`${colorClass} font-medium text-sm`}>
+            <div className="capitalize text-xs text-neutral-600 mb-1">
+              {personalTrainingPlan.plan?.name}
+            </div>
+            {message}
+            <div className="text-sm text-neutral-500 mt-1">
+              Due: {format(dueDate, "dd-MM-yyyy")}
+            </div>
+          </div>
+        );
+      },
+    },
+
     {
       accessorKey: "details",
       header: "Details",
@@ -276,6 +320,12 @@ export default function Page({
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <DropdownMenuItem
+                onClick={() => handlePayNow(user)}
+                className="cursor-pointer "
+              >
+                Pay Now
+              </DropdownMenuItem>
+              <DropdownMenuItem
                 onClick={() =>
                   setUserFormModal({
                     isOpen: true,
@@ -291,7 +341,7 @@ export default function Page({
                 onClick={() =>
                   user.id !== undefined && handleDeleteUser(user.id, user.name)
                 }
-                className="text-red-600 hover:text-red-700 cursor-pointer"
+                className=" cursor-pointer"
               >
                 Delete
               </DropdownMenuItem>

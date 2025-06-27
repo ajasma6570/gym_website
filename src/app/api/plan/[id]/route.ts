@@ -11,7 +11,9 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   }
 
   try {
-    const plan = await prisma.plan.findUnique({ where: { id } });
+    const plan = await prisma.plan.findUnique({
+      where: { id },
+    });
 
     if (!plan) {
       return NextResponse.json({ error: "Plan not found" }, { status: 404 });
@@ -34,10 +36,11 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
   const body = await req.json();
 
+  // Check for existing plan with the same name, excluding the current one
   const existingPlan = await prisma.plan.findFirst({
     where: {
       name: body.name,
-      id: { not: id }, // Exclude the current plan being updated
+      id: { not: id },
     },
   });
 
@@ -49,10 +52,15 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   }
 
   try {
-
     const updatedPlan = await prisma.plan.update({
       where: { id },
-      data: body,
+      data: {
+        name: body.name,
+        duration: body.duration,
+        amount: body.amount,
+        type: body.type,
+        status: body.status,
+      },
     });
 
     return NextResponse.json(updatedPlan);
@@ -79,9 +87,15 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
       },
     });
 
-    return NextResponse.json({ message: "Plan deleted successfully", plan: deletedPlan });
+    return NextResponse.json({
+      message: "Plan deleted successfully",
+      plan: deletedPlan,
+    });
   } catch (error) {
     console.error("DELETE plan failed:", error);
-    return NextResponse.json({ error: "Failed to delete plan" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to delete plan" },
+      { status: 500 }
+    );
   }
 }

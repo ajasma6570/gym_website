@@ -14,6 +14,10 @@ const DeleteConfirmModal = dynamic(
   () => import("@/components/admin/User/DeleteConfirmModal")
 );
 
+const PaymentModal = dynamic(
+  () => import("@/components/admin/Payment/PaymentModal")
+);
+
 export default function Page() {
   const { data, isLoading, isSuccess, isPending } = useUserList();
   const { setUserFormModal } = useContext(modalContext);
@@ -37,6 +41,7 @@ export default function Page() {
       </Button>
       <UserForm />
       <DeleteConfirmModal />
+      <PaymentModal />
       <div className="p-4 border-2 rounded-2xl">
         <UserTable
           data={data}

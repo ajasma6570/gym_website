@@ -20,7 +20,6 @@ import {
   Loader2,
 } from "lucide-react";
 import modalContext from "@/context/ModalContext";
-import { Plan, PlanList } from "@/lib/validation/planSchema";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -40,6 +39,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Plan, PlanType } from "@/types";
+
+type PlanList = Plan[];
 
 export default function Page({
   title,
@@ -50,7 +52,7 @@ export default function Page({
   isPending,
 }: {
   title: string;
-  type: "membership_plan" | "personal_training";
+  type: PlanType;
   data: PlanList;
   isLoading: boolean;
   isSuccess: boolean;

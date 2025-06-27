@@ -8,53 +8,55 @@ datasource db {
 }
 
 model Member {
-  id           Int       @id @default(autoincrement())
-  name         String
-  gender       Gender
-  phone        String    @unique
-  age          Int
-  height       Float
-  weight       Float
-  joiningDate  DateTime  @default(now())
-  planId       Int?
-  activePlan   String?
-  paymentStart DateTime?
-  dueDate      DateTime?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  status       Boolean   @default(true)
-  plan         Plan?     @relation(fields: [planId], references: [id])
-  payments     Payment[]
+  id            Int           @id @default(autoincrement())
+  name          String
+  gender        Gender
+  phone         String        @unique
+  age           Int
+  height        Float
+  weight        Float
+  joiningDate   DateTime      @default(now())
+  status        Boolean       @default(true)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  activePlanId  Int?          @unique
+  activePlan    PlanHistory?  @relation("MemberActivePlan", fields: [activePlanId], references: [id])
+  payments      Payment[]
+  planHistories PlanHistory[] @relation("MemberPlanHistories")
 }
 
 model Plan {
-  id        Int        @id @default(autoincrement())
-  name      String     @unique
-  duration  Int
-  amount    Float
-  type      PlanType   @default(membership_plan)
-  status    PlanStatus @default(active)
-  isDeleted Boolean    @default(false)
-  deletedAt DateTime?
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  members   Member[]
+  id            Int           @id @default(autoincrement())
+  name          String        @unique
+  duration      Int
+  amount        Float
+  type          PlanType      @default(membership_plan)
+  status        PlanStatus    @default(active)
+  isDeleted     Boolean       @default(false)
+  deletedAt     DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  planHistories PlanHistory[] @relation("PlanPlanHistories")
+}
+
+model PlanHistory {
+  id              Int      @id @default(autoincrement())
+  memberId        Int
+  planId          Int
+  startDate       DateTime
+  dueDate         DateTime
+  activeForMember Member?  @relation("MemberActivePlan")
+  member          Member   @relation("MemberPlanHistories", fields: [memberId], references: [id])
+  plan            Plan     @relation("PlanPlanHistories", fields: [planId], references: [id])
 }
 
 model Payment {
-  id       Int      @id @default(autoincrement())
-  memberId Int
-  amount   Float
-  date     DateTime @default(now())
-  member   Member   @relation(fields: [memberId], references: [id])
-}
-
-model Task {
-  id          Int      @id @default(autoincrement())
-  title       String
-  description String
-  completed   Boolean  @default(false)
-  createdAt   DateTime @default(now())
+  id            Int           @id @default(autoincrement())
+  memberId      Int
+  amount        Float
+  date          DateTime      @default(now())
+  paymentMethod PaymentMethod @default(cash)
+  member        Member        @relation(fields: [memberId], references: [id])
 }
 
 enum Gender {
@@ -71,4 +73,10 @@ enum PlanStatus {
 enum PlanType {
   membership_plan
   personal_training
+}
+
+enum PaymentMethod {
+  cash
+  card
+  upi
 }

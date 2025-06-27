@@ -1,5 +1,5 @@
 import { showToastMessage } from "@/lib/toast";
-import { newMemberSchema, updateMemberSchema } from "@/lib/validation/memberSchema";
+import { newMemberSchema } from "@/lib/validation/memberSchema";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 
@@ -48,7 +48,11 @@ export const useUserCreate = () => {
 export const useUserUpdate = () => {
     const query = useQueryClient();
     return useMutation({
-        mutationFn: async (updatedUser: z.infer<typeof updateMemberSchema> & { id: number }) => {
+        mutationFn: async (updatedUser: z.infer<typeof newMemberSchema> & { id: number }) => {
+
+
+            console.log("Updating user with data:", updatedUser);
+
             const response = await fetch(`/api/member/${updatedUser.id}`, {
                 method: "PUT",
                 headers: {

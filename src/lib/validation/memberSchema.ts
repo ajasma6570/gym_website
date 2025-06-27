@@ -1,7 +1,7 @@
 import { z } from "zod";
 
-// Base schema for member data that aligns with Prisma model
-const baseMemberSchema = z.object({
+// Base schema for member data (simplified for user forms)
+export const newMemberSchema = z.object({
     name: z
         .string({ required_error: "Name is required" })
         .min(2, "Name must be at least 2 characters")
@@ -37,7 +37,21 @@ const baseMemberSchema = z.object({
         .string({ required_error: "Joining date is required" })
         .min(1, "Joining date is required")
         .regex(/^\d{4}-\d{2}-\d{2}$/, "Joining date must be in YYYY-MM-DD format"),
+});
 
+export type NewMember = z.infer<typeof newMemberSchema>;
+
+// Schema for updating members (includes ID)
+export const updateMemberSchema = newMemberSchema.extend({
+    id: z.number({ required_error: "ID is required" }).int().positive(),
+});
+
+export type User = z.infer<typeof updateMemberSchema>;
+export type UserList = User[];
+
+// Extended schema for member creation with payment and plan information
+// This is used when creating members with payment plans
+export const memberWithPaymentSchema = newMemberSchema.extend({
     // Form field for selecting plan (will be converted to planId)
     activePlan: z
         .string({ required_error: "Active plan is required" })
@@ -52,58 +66,42 @@ const baseMemberSchema = z.object({
         .string({ required_error: "Due date is required" })
         .min(1, "Due date is required")
         .regex(/^\d{4}-\d{2}-\d{2}$/, "Due date must be in YYYY-MM-DD format"),
+}).superRefine((data, ctx) => {
+    const { joiningDate, paymentStart, dueDate } = data;
+
+    // Convert string dates to Date objects for comparison
+    const joinDate = new Date(joiningDate);
+    const payStart = new Date(paymentStart);
+    const due = new Date(dueDate);
+
+    // Check if dates are valid
+    if (isNaN(joinDate.getTime()) || isNaN(payStart.getTime()) || isNaN(due.getTime())) {
+        return; // Skip validation if any date is invalid
+    }
+
+    if (joinDate > payStart) {
+        ctx.addIssue({
+            path: ["paymentStart"],
+            code: "custom",
+            message: "Payment start date cannot be before joining date",
+        });
+    }
+
+    if (joinDate > due) {
+        ctx.addIssue({
+            path: ["dueDate"],
+            code: "custom",
+            message: "Due date cannot be before joining date",
+        });
+    }
+
+    if (due < payStart) {
+        ctx.addIssue({
+            path: ["dueDate"],
+            code: "custom",
+            message: "Due date cannot be before payment start date",
+        });
+    }
 });
 
-// Function to add date validation refinements
-const addDateValidation = (schema: typeof baseMemberSchema) => {
-    return schema.superRefine((data, ctx) => {
-        const { joiningDate, paymentStart, dueDate } = data;
-
-        // Convert string dates to Date objects for comparison
-        const joinDate = new Date(joiningDate);
-        const payStart = new Date(paymentStart);
-        const due = new Date(dueDate);
-
-        // Check if dates are valid
-        if (isNaN(joinDate.getTime()) || isNaN(payStart.getTime()) || isNaN(due.getTime())) {
-            return; // Skip validation if any date is invalid
-        }
-
-        if (joinDate > payStart) {
-            ctx.addIssue({
-                path: ["paymentStart"],
-                code: "custom",
-                message: "Payment start date cannot be before joining date",
-            });
-        }
-
-        if (joinDate > due) {
-            ctx.addIssue({
-                path: ["dueDate"],
-                code: "custom",
-                message: "Due date cannot be before joining date",
-            });
-        }
-
-        if (due < payStart) {
-            ctx.addIssue({
-                path: ["dueDate"],
-                code: "custom",
-                message: "Due date cannot be before payment start date",
-            });
-        }
-    });
-};
-
-// Schema for creating new members
-export const newMemberSchema = addDateValidation(baseMemberSchema);
-
-// Schema for updating members (includes ID)
-export const updateMemberSchema = addDateValidation(
-    baseMemberSchema.extend({
-        id: z.number({ required_error: "ID is required" }).int().positive(),
-    })
-);
-
-export type User = z.infer<typeof updateMemberSchema>;
-export type UserList = User[];
+export type MemberWithPayment = z.infer<typeof memberWithPaymentSchema>;
