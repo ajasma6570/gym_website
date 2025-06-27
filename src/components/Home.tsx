@@ -6,6 +6,24 @@ import { FaBicycle } from "react-icons/fa";
 import { FaBowlFood } from "react-icons/fa6";
 import Image from "next/image";
 import Map from "./Map";
+import { motion } from "framer-motion";
+
+const textVariants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.4,
+      delay: i * 0.2,
+    },
+  }),
+};
+
+const imageVariant = {
+  hidden: { opacity: 0, x: -100 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.8 } },
+};
 
 const ChooseOurGym = [
   {
@@ -76,59 +94,98 @@ export default function Home() {
         {/* Foreground Content */}
         <div className="relative z-20 w-full">
           <div className="max-w-7xl mx-auto px-10 sm:px-0 text-left">
-            <h1 className="text-3xl md:text-6xl lg:text-6xl uppercase font-bold mb-6">
-              Train with Purpose
-            </h1>
-            <p className="text-2xl md:text-4xl lg:text-5xl font-bold text-red-600 mb-6 uppercase">
-              If You Want a Different
-              <br /> Tomorrow
-            </p>
-            <p className="text-base text-white/90 mb-8 max-w-3xl">
-              Anatomy Family Fitness Centre in Nayarambalam, Vypin, Kochi offers
-              expert training, modern equipment, and personalized fitness plans
-              to help you get stronger
-            </p>
-            <a
-              href="#"
-              className="inline-block bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-colors duration-200 shadow-lg"
+            <motion.div
+              key="hero-text"
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
             >
-              Start Your Journey
-            </a>
+              <h1 className="text-3xl md:text-6xl lg:text-6xl uppercase font-bold mb-6">
+                Train with Purpose
+              </h1>
+
+              <p className="text-2xl md:text-4xl lg:text-5xl font-bold text-red-600 mb-6 uppercase">
+                If You Want a Different
+                <br /> Tomorrow
+              </p>
+
+              <p className="text-base text-white/90 mb-8 max-w-3xl">
+                Anatomy Family Fitness Centre in Nayarambalam, Vypin, Kochi
+                offers expert training, modern equipment, and personalized
+                fitness plans to help you get stronger
+              </p>
+              <a
+                href="#"
+                className="inline-block bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-colors duration-200 shadow-lg"
+              >
+                Start Your Journey
+              </a>
+            </motion.div>
           </div>
         </div>
       </div>
 
       <div className="pt-24 pb-16 md:pb-0 ">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-xl md:text-2xl font-semibold mb-4 uppercase">
+          <motion.div
+            key="choose-our-gym"
+            whileInView="visible"
+            initial="hidden"
+            viewport={{ once: true, amount: 0.3 }}
+            className="text-center mb-12"
+          >
+            <motion.h2
+              key="choose-our-gym-title"
+              variants={textVariants}
+              custom={0}
+              className="text-xl md:text-2xl font-semibold mb-4 uppercase"
+            >
               Why Choose Anatomy Gym in Kochi
-            </h2>
-            <p className="text-3xl lg:text-4xl text-red-600 max-w-2xl mx-auto font-extrabold">
+            </motion.h2>
+            <motion.p
+              key="choose-our-gym-description"
+              variants={textVariants}
+              custom={1}
+              className="text-3xl lg:text-4xl text-red-600 max-w-2xl mx-auto font-extrabold"
+            >
               Achieve Amazing Results with Our Fitness Programs
-            </p>
-          </div>
+            </motion.p>
+          </motion.div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8 px-4 sm:px-6 lg:px-8">
           {ChooseOurGym.map((item, index) => (
-            <div
+            <motion.div
               key={item.title + index}
-              className="text-center p-6  rounded-lg shadow-md"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: index * 0.2 }}
+              className="text-center p-6 rounded-lg shadow-md"
             >
               <div className="w-16 h-16  rounded-full flex items-center justify-center mx-auto mb-4">
                 {item.icon}
               </div>
               <h3 className="text-xl font-semibold mb-2">{item.title}</h3>
               <p className="">{item.description}</p>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8 text-left min-h-screen flex flex-col justify-center items-center ">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full w-full">
-          <div className="h-full w-full flex items-center justify-center">
+        <motion.div
+          key="gym-features"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.3 }}
+          className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full w-full"
+        >
+          <motion.div
+            key="gym-features-image"
+            variants={imageVariant}
+            className="h-full w-full flex items-center justify-center"
+          >
             <Image
               priority
               fetchPriority="high"
@@ -139,81 +196,143 @@ export default function Home() {
               className="object-cover rounded-3xl"
               style={{ width: "520px", height: "600px" }}
             />
-          </div>
+          </motion.div>
           <div className="h-full w-full flex flex-col justify-center items-start p-8 space-y-10">
-            <h2 className="text-xl md:text-2xl font-semibold mb-4 uppercase text-white">
+            <motion.h2
+              key="gym-features-title"
+              variants={textVariants}
+              custom={0}
+              className="text-xl md:text-2xl font-semibold mb-4 uppercase text-white"
+            >
               Why Choose Anatomy Family Fitness Centre in Vypin
-            </h2>
-            <p className="text-2xl md:text-4xl lg:text-5xl font-bold text-red-600 mb-6 uppercase">
+            </motion.h2>
+            <motion.p
+              key="gym-features-subtitle"
+              variants={textVariants}
+              custom={1}
+              className="text-2xl md:text-4xl lg:text-5xl font-bold text-red-600 mb-6 uppercase"
+            >
               Top Trainers & Best Gym Equipment in Kochi
-            </p>
-            <p>
+            </motion.p>
+            <motion.p
+              key="gym-features-description"
+              variants={textVariants}
+              custom={2}
+            >
               Located in Nayarambalam, Vypin – Anatomy Gym offers certified
               personal training, advanced equipment, and custom workout plans to
               help you reach peak performance.
-            </p>
+            </motion.p>
 
-            <ul className="list-disc pl-5  text-xl space-y-2">
+            <motion.ul
+              key="gym-features-list"
+              variants={textVariants}
+              custom={3}
+              className="list-disc pl-5 text-xl space-y-2"
+            >
               <li>Personal Training</li>
               <li>Group Training</li>
-            </ul>
-
-            <a
+            </motion.ul>
+            <motion.a
+              key="gym-features-join-button"
+              variants={textVariants}
+              custom={4}
               href="#"
               className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-colors duration-200 shadow-lg"
             >
               Join Now
-            </a>
+            </motion.a>
           </div>
-        </div>
+        </motion.div>
       </div>
 
-      <div className=" mx-auto  text-center min-h-screen flex flex-col justify-center items-center ">
+      <motion.div
+        key="performance-section"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.3 }}
+        className="mx-auto text-center min-h-screen flex flex-col justify-center items-center"
+      >
         <div className="grid grid-cols-1 lg:grid-cols-2 h-full w-full">
+          {/* Left Text Block with staggered animation */}
           <div className="h-full w-full flex flex-col justify-center bg-[#1a1919] items-center p-8 space-y-10">
-            <p className="text-xl font-normal text-center">
+            <motion.p
+              key="performance-section-subtitle"
+              variants={textVariants}
+              custom={0}
+              className="text-3xl font-normal text-center"
+            >
               Experience the Difference
-            </p>
-            <p className="text-2xl xl:leading-16 md:text-4xl xl:text-5xl font-bold text-red-600 mb-6 uppercase">
+            </motion.p>
+            <motion.p
+              key="performance-section-title"
+              variants={textVariants}
+              custom={1}
+              className="text-2xl xl:leading-16 md:text-4xl xl:text-5xl font-bold text-red-600 mb-6 uppercase"
+            >
               Designed to Achieve <br /> Peak Performance
-            </p>
-            <p className="text-lg text-white/90 max-w-2xl mx-auto">
+            </motion.p>
+            <motion.p
+              key="performance-section-description"
+              variants={textVariants}
+              custom={2}
+              className="text-lg text-white/90 max-w-2xl mx-auto"
+            >
               At our fitness center, we combine innovative training methods with
               expert guidance to help you reach your goals. Whether you are just
               starting out or looking to push beyond your limits, we have got
               you covered.
-            </p>
-          </div>{" "}
-          <div className="h-full w-full flex items-center justify-center">
-            <Image
-              priority
-              fetchPriority="high"
-              src="/images/image5.webp"
-              alt="Cross Training Rope Swing Exercise"
-              width={520}
-              height={600}
-              className="object-cover  h-full w-full"
-            />
+            </motion.p>
           </div>
+
+          <Image
+            priority
+            fetchPriority="high"
+            src="/images/image5.webp"
+            alt="Cross Training Rope Swing Exercise"
+            width={520}
+            height={600}
+            className="object-cover h-full w-full"
+          />
         </div>
-      </div>
+      </motion.div>
 
       {/* Our Trainers Section */}
       <div className="py-16 ">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-xl md:text-2xl font-semibold mb-4 uppercase text-white">
+          <motion.div
+            key="our-trainers"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+            className="text-center mb-12"
+          >
+            <motion.h2
+              key="our-trainers-title"
+              variants={textVariants}
+              custom={0}
+              className="text-xl md:text-2xl font-semibold mb-4 uppercase text-white"
+            >
               Gym Equipment at Anatomy Fitness - Nayarambalam , Vypin , Kochi
-            </h2>
-            <p className="text-3xl lg:text-4xl text-red-600 max-w-2xl mx-auto font-extrabold">
+            </motion.h2>
+            <motion.p
+              key="our-trainers-subtitle"
+              variants={textVariants}
+              custom={1}
+              className="text-3xl lg:text-4xl text-red-600 max-w-2xl mx-auto font-extrabold"
+            >
               High-Performance Machines for Every Fitness Goal
-            </p>
-          </div>
+            </motion.p>
+          </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {trainers.map((trainer, index) => (
-              <div
+              <motion.div
                 key={trainer.name + index}
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: index * 0.2 }}
                 className="bg-[#1a1919] rounded-2xl shadow-lg overflow-hidden"
               >
                 <div className="h-64 bg-gray-300 flex items-center justify-center">
@@ -236,38 +355,68 @@ export default function Home() {
                     {trainer.description}
                   </p>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
 
-          <div className="text-center mt-12">
-            <a
+          <motion.div
+            key="book-session-button"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+            className="text-center mt-12"
+          >
+            <motion.a
+              key="book-session-button"
+              variants={textVariants}
+              custom={2}
               href="#"
               className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-colors duration-200 shadow-lg"
             >
               Book a Session
-            </a>
-          </div>
+            </motion.a>
+          </motion.div>
         </div>
       </div>
 
       {/* Location Section */}
       <div className=" pt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
-          <div className="text-center">
-            <h2 className="text-xl md:text-2xl font-semibold mb-4 uppercase ">
+          <motion.div
+            key="gym-location"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+            className="text-center"
+          >
+            <motion.h2
+              key="gym-location-title"
+              variants={textVariants}
+              custom={0}
+              className="text-xl md:text-2xl font-semibold mb-4 uppercase "
+            >
               Gym Location - Nayarambalam, Vypin
-            </h2>
-            <p className="text-3xl lg:text-4xl text-red-600 max-w-2xl mx-auto font-extrabold mb-4">
+            </motion.h2>
+            <motion.p
+              key="gym-location-subtitle"
+              variants={textVariants}
+              custom={1}
+              className="text-3xl lg:text-4xl text-red-600 max-w-2xl mx-auto font-extrabold mb-4"
+            >
               Visit Our Gym in Kochi
-            </p>
-            <p className="text-gray-300 max-w-4xl  mx-auto">
+            </motion.p>
+            <motion.p
+              key="gym-location-description"
+              variants={textVariants}
+              custom={2}
+              className="text-gray-300 max-w-4xl  mx-auto"
+            >
               Anatomy Family Fitness Centre is conveniently located in
               Nayarambalam, Vypin, Kochi. Easily accessible from all major areas
               with ample parking and modern facilities. Book a tour and see why
               we’re the best gym near you!
-            </p>
-          </div>
+            </motion.p>
+          </motion.div>
         </div>
 
         <Map />

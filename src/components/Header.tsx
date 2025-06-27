@@ -7,6 +7,7 @@ import { IoIosCall } from "react-icons/io";
 // import { IoClose } from "react-icons/io5";
 // import { menuItems } from "@/lib/staticData/data";
 import Image from "next/image";
+import { motion } from "framer-motion";
 
 const Header = () => {
   // const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -59,7 +60,13 @@ const Header = () => {
           }`}
         >
           {/* Logo/Icon - Left Side */}
-          <div className="flex-shrink-0">
+          <motion.div
+            key="logo-header"
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2, duration: 0.4 }}
+            className="flex-shrink-0"
+          >
             <Link href="/" className="flex items-center space-x-2">
               <Image
                 src="/images/logo-bg-none.webp"
@@ -74,7 +81,7 @@ const Header = () => {
                 Anatomy */}
               {/* </span> */}
             </Link>
-          </div>
+          </motion.div>
 
           {/* Desktop Navigation - Center */}
           {/* <nav className="hidden md:flex space-x-8 absolute left-1/2 transform -translate-x-1/2">
@@ -90,7 +97,13 @@ const Header = () => {
           </nav> */}
 
           {/* Call Button - Right Side (Desktop) */}
-          <div className="flex items-center">
+          <motion.div
+            key="call-button-header"
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3, duration: 0.4 }}
+            className="flex items-center"
+          >
             <a
               href="tel:+1234567890"
               className={`flex items-center px-4 py-2 rounded-md transition-colors duration-200 ${
@@ -102,7 +115,7 @@ const Header = () => {
               <IoIosCall className="h-5 w-5 mr-1.5" />
               <span className="text-sm font-medium">Call Now</span>
             </a>
-          </div>
+          </motion.div>
 
           {/* Mobile menu button */}
           {/* <div className="md:hidden">
