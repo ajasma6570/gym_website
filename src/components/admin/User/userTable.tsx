@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useContext, useState, useCallback } from "react";
+import React, { useContext, useState, useCallback, useMemo } from "react";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -83,6 +83,7 @@ export default function Page({
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
+  const [globalFilter, setGlobalFilter] = useState("");
   const { setUserFormModal, setDeleteConfirmModal } = useContext(modalContext);
 
   const handleDeleteUser = useCallback(
@@ -95,6 +96,11 @@ export default function Page({
     },
     [setDeleteConfirmModal]
   );
+
+  // Memoize the table data to prevent infinite re-renders
+  const tableData = useMemo(() => {
+    return isSuccess && data ? data : [];
+  }, [data, isSuccess]);
 
   const columns: ColumnDef<User>[] = [
     // {
@@ -214,8 +220,14 @@ export default function Page({
       id: "expiryStatus",
       header: "Expiry Status",
       cell: ({ row }) => {
-        const paymentStart = new Date(row.original.paymentStart);
-        const dueDate = addDays(paymentStart, 30);
+        const paymentStartStr = row.original.paymentStart;
+        const dueDateStr = row.original.dueDate;
+
+        if (!paymentStartStr || !dueDateStr) {
+          return <div className="text-gray-500">No date info</div>;
+        }
+
+        const dueDate = new Date(dueDateStr);
         const now = new Date();
 
         const daysLeft = differenceInCalendarDays(dueDate, now);
@@ -291,7 +303,7 @@ export default function Page({
   ];
 
   const table = useReactTable({
-    data: isSuccess ? data : [],
+    data: tableData,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -301,23 +313,41 @@ export default function Page({
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
+    onGlobalFilterChange: setGlobalFilter,
+    globalFilterFn: (row, columnId, value) => {
+      const name = String(row.getValue("name")).toLowerCase().trim();
+      const phone = String(row.getValue("phone")).toLowerCase().trim();
+      const searchValue = value.toLowerCase().trim();
+
+      // Skip search if searchValue is empty after trimming
+      if (!searchValue) return true;
+
+      // For name search, also check without spaces to handle cases like "ajasma" matching "Ajas M A"
+      const nameWithoutSpaces = name.replace(/\s+/g, "");
+      const searchWithoutSpaces = searchValue.replace(/\s+/g, "");
+
+      return (
+        name.includes(searchValue) ||
+        nameWithoutSpaces.includes(searchWithoutSpaces) ||
+        phone.includes(searchValue)
+      );
+    },
     state: {
       sorting,
       columnFilters,
       columnVisibility,
       rowSelection,
+      globalFilter,
     },
   });
 
   return (
     <div className="w-full">
-      <div className="flex items-center py-4">
+      <div className="flex items-center py-4 gap-4">
         <Input
-          placeholder="Filter Name"
-          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("name")?.setFilterValue(event.target.value)
-          }
+          placeholder="Search by name or phone..."
+          value={globalFilter ?? ""}
+          onChange={(event) => setGlobalFilter(event.target.value)}
           className="max-w-sm"
         />
         <DropdownMenu>
