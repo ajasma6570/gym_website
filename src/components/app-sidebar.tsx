@@ -46,10 +46,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarHeader className="text-2xl font-bold px-4">
         <Link href="/" className="flex items-center space-x-2">
           <Image
-            src="/assets/logo_anatomy1.png"
+            src="/images/logo-bg-none.webp"
             alt="Anatomy"
             width={80}
-            height={60}
+            height={80}
           />
         </Link>
       </SidebarHeader>
