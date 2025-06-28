@@ -44,17 +44,24 @@ export async function POST(request: NextRequest) {
         });
 
         return NextResponse.json(task, { status: 201 });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("POST task error:", error);
-        
+
         // Handle Prisma unique constraint violation
-        if (error.code === 'P2002' && error.meta?.target?.includes('title')) {
+        if (error && typeof error === 'object' && 'code' in error &&
+            error.code === 'P2002' &&
+            'meta' in error &&
+            error.meta &&
+            typeof error.meta === 'object' &&
+            'target' in error.meta &&
+            Array.isArray(error.meta.target) &&
+            error.meta.target.includes('title')) {
             return NextResponse.json(
                 { error: "A task with this title already exists" },
                 { status: 409 } // Conflict status code
             );
         }
-        
+
         return NextResponse.json(
             { error: "Failed to create task" },
             { status: 500 }

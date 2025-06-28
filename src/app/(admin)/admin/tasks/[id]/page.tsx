@@ -76,7 +76,8 @@ export default function TaskDetailPage() {
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Task Not Found</h1>
           <p className="text-muted-foreground mb-4">
-            The task you're looking for doesn't exist or has been deleted.
+            The task you&#39;re looking for doesn&#39;t exist or has been
+            deleted.
           </p>
           <Button onClick={() => router.push("/admin/tasks")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -88,25 +89,21 @@ export default function TaskDetailPage() {
   }
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="container mx-auto ">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col lg:flex-row lg:items-center space-y-4 lg:justify-between mb-6">
         <div className="flex items-center space-x-4">
-          <Button variant="ghost" onClick={() => router.push("/admin/tasks")}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Tasks
-          </Button>
           <div>
-            <h1 className="text-3xl font-bold">Task Details</h1>
+            <h1 className="text-2xl font-bold">Task Details</h1>
             <p className="text-muted-foreground">
               View and manage task information
             </p>
           </div>
         </div>
 
-        <div className="flex items-center space-x-2">
+        <div className="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-2 space-x-2">
           <Button
-            variant={task.isComplete ? "secondary" : "default"}
+            variant={task.isComplete ? "secondary" : "secondary"}
             onClick={handleToggleComplete}
           >
             {task.isComplete ? (
@@ -125,7 +122,7 @@ export default function TaskDetailPage() {
             <Edit className="mr-2 h-4 w-4" />
             Edit
           </Button>
-          <Button variant="destructive" onClick={handleDelete}>
+          <Button variant="default" onClick={handleDelete}>
             <Trash2 className="mr-2 h-4 w-4" />
             Delete
           </Button>

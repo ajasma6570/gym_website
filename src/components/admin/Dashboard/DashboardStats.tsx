@@ -25,7 +25,7 @@ const StatCard = ({
   bgColor?: string;
 }) => (
   <Card
-    className={`flex flex-row items-center justify-between p-4 gap-4 ${bgColor}`}
+    className={`flex flex-row items-center border-none dark:border shadow-md justify-between p-4 gap-4 ${bgColor}`}
   >
     <div className="flex-1">
       <CardHeader className="px-0 py-0">

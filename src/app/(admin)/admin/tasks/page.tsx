@@ -14,6 +14,17 @@ import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import dynamic from "next/dynamic";
 
+// Define Task interface
+interface Task {
+  id: number;
+  title: string;
+  description?: string | null;
+  isComplete: boolean;
+  deletedAt?: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 // Dynamically import modals to avoid SSR issues
 const TaskForm = dynamic(() => import("@/components/admin/Task/TaskForm"));
 const TaskDeleteConfirmModal = dynamic(
@@ -27,7 +38,7 @@ export default function TaskPage() {
   const { mutate: toggleComplete } = useTaskToggleComplete();
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [editingTask, setEditingTask] = useState<any>(null);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [deletingTaskId, setDeletingTaskId] = useState<number | null>(null);
 
   const completedTasks = tasks.filter((task) => task.isComplete);
@@ -37,7 +48,7 @@ export default function TaskPage() {
     toggleComplete({ taskId, isComplete: !currentStatus });
   };
 
-  const handleEdit = (task: any) => {
+  const handleEdit = (task: Task) => {
     setEditingTask(task);
   };
 
@@ -61,12 +72,12 @@ export default function TaskPage() {
   }
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
+    <div className="container mx-auto ">
+      <div className="flex justify-between items-center mb-2 lg:mb-6">
         <div>
-          <h1 className="text-3xl font-bold">Task Management</h1>
-          <p className="text-muted-foreground">
-            Manage your tasks and track progress
+          <h1 className="text-2xl font-bold">Task Management</h1>
+          <p className="text-muted-foreground hidden lg:block">
+            Manage your tasks and track progress.
           </p>
         </div>
         <Button onClick={() => setIsCreateModalOpen(true)}>
@@ -74,24 +85,27 @@ export default function TaskPage() {
           Add Task
         </Button>
       </div>
+      <p className="text-muted-foreground mb-6 lg:hidden">
+        Manage your tasks and track progress.
+      </p>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <Card className="p-4 gap-0">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 px-0 py-0">
-            <CardTitle className="text-xl font-bold">Total Tasks</CardTitle>
+            <CardTitle className="text-xl ">Total Tasks</CardTitle>
           </CardHeader>
           <CardContent className="px-0 pt-1 pb-0">
-            <div className="text-lg font-bold">{tasks.length}</div>
+            <div className="text-xl font-semibold ">{tasks.length}</div>
           </CardContent>
         </Card>
 
         <Card className="p-4 gap-0">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 px-0 py-0">
-            <CardTitle className="text-xl font-bold">Pending</CardTitle>
+            <CardTitle className="text-xl ">Pending</CardTitle>
           </CardHeader>
           <CardContent className="px-0 pt-1 pb-0">
-            <div className="text-lg font-bold text-orange-600">
+            <div className="text-xl font-semibold text-orange-600">
               {pendingTasks.length}
             </div>
           </CardContent>
@@ -99,10 +113,10 @@ export default function TaskPage() {
 
         <Card className="p-4 gap-0">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 px-0 py-0">
-            <CardTitle className="text-lg font-bold">Completed</CardTitle>
+            <CardTitle className="text-md ">Completed</CardTitle>
           </CardHeader>
           <CardContent className="px-0 pt-1 pb-0">
-            <div className="text-2xl font-bold text-green-600">
+            <div className="text-xl font-semibold text-green-600">
               {completedTasks.length}
             </div>
           </CardContent>
@@ -128,7 +142,7 @@ export default function TaskPage() {
               pendingTasks.map((task) => (
                 <div
                   key={task.id}
-                  className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50"
+                  className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 dark:bg-background dark:border-background/50"
                 >
                   <div className="flex items-center space-x-3 flex-1">
                     <Button
@@ -155,6 +169,7 @@ export default function TaskPage() {
                   <div className="flex items-center space-x-2">
                     <Button
                       variant="ghost"
+                      className="cursor-pointer"
                       size="sm"
                       onClick={() => handleEdit(task)}
                     >
@@ -162,6 +177,7 @@ export default function TaskPage() {
                     </Button>
                     <Button
                       variant="ghost"
+                      className="cursor-pointer"
                       size="sm"
                       onClick={() => handleDelete(task.id)}
                     >
@@ -191,7 +207,7 @@ export default function TaskPage() {
               completedTasks.map((task) => (
                 <div
                   key={task.id}
-                  className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 opacity-75"
+                  className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 dark:bg-background dark:border-background/50"
                 >
                   <div className="flex items-center space-x-3 flex-1">
                     <Button
@@ -219,6 +235,7 @@ export default function TaskPage() {
                     <Badge variant="secondary">Done</Badge>
                     <Button
                       variant="ghost"
+                      className="cursor-pointer"
                       size="sm"
                       onClick={() => handleDelete(task.id)}
                     >

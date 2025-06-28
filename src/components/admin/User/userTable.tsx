@@ -299,7 +299,12 @@ export default function Page({
       accessorKey: "details",
       header: "Details",
       cell: ({ row }) => (
-        <Link href={`/admin/members/${row.original.id}`}>View</Link>
+        <Link
+          className="text-blue-500 hover:text-blue-700 cursor-pointer"
+          href={`/admin/members/${row.original.id}`}
+        >
+          View
+        </Link>
       ),
     },
     {
@@ -393,16 +398,19 @@ export default function Page({
 
   return (
     <div className="w-full">
-      <div className="flex items-center py-4 gap-4">
+      <div className="flex items-center flex-col gap-4 lg:flex-row py-4">
         <Input
           placeholder="Search by name or phone..."
           value={globalFilter ?? ""}
           onChange={(event) => setGlobalFilter(event.target.value)}
-          className="max-w-sm"
+          className="w-full lg:max-w-sm"
         />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
+            <Button
+              variant="outline"
+              className="w-full lg:max-w-[150px] lg:ml-auto"
+            >
               Columns <ChevronDown />
             </Button>
           </DropdownMenuTrigger>

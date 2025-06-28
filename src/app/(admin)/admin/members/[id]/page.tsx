@@ -191,18 +191,16 @@ export default function MemberPage() {
                           >
                             <div className="flex justify-between items-start">
                               <div>
-                                <p className="font-medium text-white">
+                                <p className="font-medium ">
                                   {currentPlan.plan?.name}
                                 </p>
-                                <p className="text-base text-white">
-                                  Membership
-                                </p>
-                                <p className="text-sm text-white">
+                                <p className="text-base ">Membership</p>
+                                <p className="text-sm ">
                                   ₹{currentPlan.plan?.amount}
                                 </p>
                               </div>
                               <div className="text-right text-sm">
-                                <p className="text-white">
+                                <p className="">
                                   {format(
                                     new Date(currentPlan.startDate),
                                     "dd MMM yyyy"
@@ -258,7 +256,7 @@ export default function MemberPage() {
 
               {/*Personal Training Section */}
 
-              <Card className="gap-2">
+              <Card className="gap-2 ">
                 <CardHeader>
                   <CardTitle className="text-xl font-semibold">
                     Active Personal Training Plan
@@ -282,18 +280,16 @@ export default function MemberPage() {
                           >
                             <div className="flex justify-between items-start">
                               <div>
-                                <p className="font-medium text-white">
+                                <p className="font-medium ">
                                   {ptPlan.plan?.name}
                                 </p>
-                                <p className="text-base text-white">
-                                  Personal Training
-                                </p>
-                                <p className="text-sm text-white">
+                                <p className="text-base ">Personal Training</p>
+                                <p className="text-sm ">
                                   ₹{ptPlan.plan?.amount}
                                 </p>
                               </div>
                               <div className="text-right text-sm">
-                                <p className="text-white">
+                                <p className="">
                                   {format(
                                     new Date(ptPlan.startDate),
                                     "dd MMM yyyy"
@@ -394,18 +390,16 @@ export default function MemberPage() {
                           >
                             <div className="flex justify-between items-start">
                               <div>
-                                <p className="font-medium text-white">
+                                <p className="font-medium ">
                                   {latestFuturePlan.plan?.name}
                                 </p>
-                                <p className="text-base text-white">
-                                  Membership
-                                </p>
-                                <p className="text-sm text-white">
+                                <p className="text-base ">Membership</p>
+                                <p className="text-sm ">
                                   ₹{latestFuturePlan.plan?.amount}
                                 </p>
                               </div>
                               <div className="text-right text-sm">
-                                <p className="text-white">
+                                <p className="">
                                   {format(
                                     new Date(latestFuturePlan.startDate),
                                     "dd MMM yyyy"

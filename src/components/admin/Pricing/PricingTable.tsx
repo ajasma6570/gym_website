@@ -236,18 +236,21 @@ export default function Page({
       <div>
         <h1 className="text-2xl font-bold">{title}</h1>
       </div>
-      <div className="flex items-center py-4">
+      <div className="flex items-center flex-col gap-4 lg:flex-row py-4">
         <Input
           placeholder="Filter Name"
           value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
             table.getColumn("name")?.setFilterValue(event.target.value)
           }
-          className="max-w-sm"
+          className="w-full lg:max-w-sm"
         />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
+            <Button
+              variant="outline"
+              className="w-full lg:max-w-[150px] lg:ml-auto"
+            >
               Columns <ChevronDown />
             </Button>
           </DropdownMenuTrigger>

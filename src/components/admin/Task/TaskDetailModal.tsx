@@ -12,18 +12,20 @@ import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { CheckCircle, Circle, Edit, Trash2 } from "lucide-react";
 
+interface Task {
+  id: number;
+  title: string;
+  description?: string | null;
+  isComplete: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 interface TaskDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
-  task: {
-    id: number;
-    title: string;
-    description?: string | null;
-    isComplete: boolean;
-    createdAt: Date;
-    updatedAt: Date;
-  } | null;
-  onEdit?: (task: any) => void;
+  task: Task | null;
+  onEdit?: (task: Task) => void;
   onDelete?: (taskId: number) => void;
   onToggleComplete?: (taskId: number, currentStatus: boolean) => void;
 }

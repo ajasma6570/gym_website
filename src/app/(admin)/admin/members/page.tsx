@@ -42,7 +42,7 @@ export default function Page() {
       <UserForm />
       <DeleteConfirmModal />
       <PaymentModal />
-      <div className="p-4 border-2 rounded-2xl">
+      <div className="p-4 border shadow-md dark:border rounded-2xl mt-4">
         <UserTable
           data={data}
           isLoading={isLoading}

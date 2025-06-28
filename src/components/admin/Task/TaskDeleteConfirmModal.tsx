@@ -22,7 +22,6 @@ export default function TaskDeleteConfirmModal({
   isOpen,
   onClose,
   onConfirm,
-  taskId,
 }: TaskDeleteConfirmModalProps) {
   const handleConfirm = () => {
     onConfirm();
@@ -47,7 +46,7 @@ export default function TaskDeleteConfirmModal({
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button variant="destructive" onClick={handleConfirm}>
+          <Button variant="default" onClick={handleConfirm}>
             Delete Task
           </Button>
         </div>

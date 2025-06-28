@@ -4,10 +4,11 @@ import { prisma } from "@/lib/prisma";
 // GET /api/tasks/[id] - Get task by ID
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const taskId = parseInt(params.id);
+        const result = await params;
+        const taskId = parseInt(result.id);
 
         if (isNaN(taskId)) {
             return NextResponse.json(
@@ -43,10 +44,11 @@ export async function GET(
 // PUT /api/tasks/[id] - Update task
 export async function PUT(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const taskId = parseInt(params.id);
+        const result = await params;
+        const taskId = parseInt(result.id);
 
         if (isNaN(taskId)) {
             return NextResponse.json(
@@ -95,10 +97,11 @@ export async function PUT(
 // DELETE /api/tasks/[id] - Soft delete task
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const taskId = parseInt(params.id);
+        const result = await params;
+        const taskId = parseInt(result.id);
 
         if (isNaN(taskId)) {
             return NextResponse.json(

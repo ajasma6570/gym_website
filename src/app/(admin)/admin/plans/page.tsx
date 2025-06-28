@@ -41,28 +41,29 @@ export default function PlanPage() {
         New Plan
       </Button>
 
-      <div className="p-4 border-2 rounded-2xl">
-        <PricingTable
-          title="Membership Plans"
-          type="membership_plan"
-          data={data}
-          isLoading={isLoading}
-          isSuccess={isSuccess}
-          isPending={isPending}
-        />
-      </div>
+      <div className="space-y-6 mt-4">
+        <div className="p-4 border-2 rounded-2xl">
+          <PricingTable
+            title="Membership Plans"
+            type="membership_plan"
+            data={data}
+            isLoading={isLoading}
+            isSuccess={isSuccess}
+            isPending={isPending}
+          />
+        </div>
 
-      <div className="p-4 border-2 rounded-2xl">
-        <PricingTable
-          title="Personal Training Plans"
-          type="personal_training"
-          data={data}
-          isLoading={isLoading}
-          isSuccess={isSuccess}
-          isPending={isPending}
-        />
+        <div className="p-4 border-2 rounded-2xl">
+          <PricingTable
+            title="Personal Training Plans"
+            type="personal_training"
+            data={data}
+            isLoading={isLoading}
+            isSuccess={isSuccess}
+            isPending={isPending}
+          />
+        </div>
       </div>
-
       <PlanForm />
       <PlanDeleteConfirmModal />
     </>

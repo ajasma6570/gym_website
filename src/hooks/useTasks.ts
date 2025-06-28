@@ -191,7 +191,10 @@ export const useTaskToggleComplete = () => {
 };
 
 // Helper function to transform form data if needed
-export const transformTaskFormData = (formData: any): CreateTaskRequest => {
+export const transformTaskFormData = (formData: {
+    title: string;
+    description?: string;
+}): CreateTaskRequest => {
     return {
         title: formData.title,
         description: formData.description || undefined,
