@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 interface DashboardStats {
     totalMembers: number;
@@ -9,31 +9,26 @@ interface DashboardStats {
     personalTrainingUsers: number;
 }
 
+const fetchDashboardStats = async (): Promise<DashboardStats> => {
+    const response = await fetch('/api/dashboard/stats');
+    if (!response.ok) {
+        throw new Error('Failed to fetch dashboard statistics');
+    }
+    return response.json();
+};
+
 export function useDashboardStats() {
-    const [stats, setStats] = useState<DashboardStats | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const { data: stats, isLoading: loading, error, refetch } = useQuery<DashboardStats>({
+        queryKey: ["dashboard-stats"],
+        queryFn: fetchDashboardStats,
+        refetchOnWindowFocus: false,
+        staleTime: Infinity,
+    });
 
-    const fetchStats = async () => {
-        try {
-            setLoading(true);
-            const response = await fetch('/api/dashboard/stats');
-            if (!response.ok) {
-                throw new Error('Failed to fetch dashboard statistics');
-            }
-            const data = await response.json();
-            setStats(data);
-            setError(null);
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'An error occurred');
-        } finally {
-            setLoading(false);
-        }
+    return {
+        stats: stats || null,
+        loading,
+        error: error?.message || null,
+        refetch
     };
-
-    useEffect(() => {
-        fetchStats();
-    }, []);
-
-    return { stats, loading, error, refetch: fetchStats };
 }

@@ -36,7 +36,7 @@ export const usePaymentDetails = (memberId: string) => {
             }
             return response.json();
         },
-        refetchOnWindowFocus: true,
+        refetchOnWindowFocus: false,
     });
 }
 
