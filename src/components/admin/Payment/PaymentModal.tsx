@@ -762,10 +762,8 @@ export default function PaymentModal() {
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="cash">Cash</SelectItem>
-                            <SelectItem value="bank">Bank Transfer</SelectItem>
-                            <SelectItem value="both">
-                              Both (Cash + Bank)
-                            </SelectItem>
+                            <SelectItem value="card">Card</SelectItem>
+                            <SelectItem value="upi">Upi</SelectItem>
                           </SelectContent>
                         </Select>
                       </FormControl>
