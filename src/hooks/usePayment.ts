@@ -79,6 +79,8 @@ export const usePaymentCreate = () => {
             queryClient.invalidateQueries({ queryKey: ["users"] });
             // Also invalidate member details if viewing specific member
             queryClient.invalidateQueries({ queryKey: ["member"] });
+            // Invalidate payment details to update user detail page immediately
+            queryClient.invalidateQueries({ queryKey: ["payment details"] });
             showToastMessage("Payment created successfully!", "success");
         },
         onError: (error) => {
