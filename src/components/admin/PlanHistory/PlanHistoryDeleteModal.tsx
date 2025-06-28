@@ -68,10 +68,11 @@ export default function PlanHistoryDeleteModal() {
           </p>
           <p className="text-sm text-muted-foreground mt-2">
             This action cannot be undone and will permanently remove the plan
-            from the member's history.
+            from the member&rsquo;s history.
           </p>
           <p className="text-sm text-orange-600 mt-2 font-medium">
-            ⚠️ The associated payment will also be deleted and the amount will be removed from payment history.
+            ⚠️ The associated payment will also be deleted and the amount will
+            be removed from payment history.
           </p>
         </div>
 

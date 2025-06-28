@@ -425,8 +425,6 @@ export default function PaymentModal() {
   const nextDate = new Date(dueDate);
   nextDate.setDate(nextDate.getDate() + 1);
 
-  const formattedDate = nextDate.toISOString().split("T")[0];
-
   return (
     <Dialog open={paymentFormModal.isOpen} onOpenChange={handleModalClose}>
       <DialogContent className="sm:max-w-2xl max-h-[90vh] flex flex-col">
@@ -589,8 +587,9 @@ export default function PaymentModal() {
               </div>
 
               {/* Separate Start Date Fields */}
-              {((watchedPlanId && watchedPlanId > 0) || 
-                (watchedPersonalTrainingId && watchedPersonalTrainingId > 0)) && (
+              {((watchedPlanId && watchedPlanId > 0) ||
+                (watchedPersonalTrainingId &&
+                  watchedPersonalTrainingId > 0)) && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Membership Payment Start Date */}
                   {watchedPlanId && watchedPlanId > 0 && (
@@ -615,28 +614,29 @@ export default function PaymentModal() {
                   )}
 
                   {/* Personal Training Payment Start Date */}
-                  {watchedPersonalTrainingId && watchedPersonalTrainingId > 0 && (
-                    <FormField
-                      name="personalTrainingPaymentStart"
-                      control={form.control}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>
-                            Personal Training Payment Start Date
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              type="date"
-                              placeholder="Select PT start date"
-                              {...field}
-                              value={field.value || ""}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  )}
+                  {watchedPersonalTrainingId &&
+                    watchedPersonalTrainingId > 0 && (
+                      <FormField
+                        name="personalTrainingPaymentStart"
+                        control={form.control}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>
+                              Personal Training Payment Start Date
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                type="date"
+                                placeholder="Select PT start date"
+                                {...field}
+                                value={field.value || ""}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
                 </div>
               )}
 
