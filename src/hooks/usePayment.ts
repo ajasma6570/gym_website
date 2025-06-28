@@ -36,6 +36,7 @@ export const usePaymentDetails = (memberId: string) => {
             }
             return response.json();
         },
+        enabled: !!memberId && memberId.trim() !== "", // Only run query when memberId is provided and not empty
         refetchOnWindowFocus: false,
     });
 }

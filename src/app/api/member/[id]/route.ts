@@ -98,14 +98,30 @@ export async function DELETE(
       return NextResponse.json({ error: "Member not found" }, { status: 404 });
     }
 
-    const updated = await prisma.member.delete({
-      where: { id: memberId },
+    // Use transaction to ensure all deletions happen together
+    const result = await prisma.$transaction(async (tx) => {
+      // First, delete all plan histories for this member
+      await tx.planHistory.deleteMany({
+        where: { memberId: memberId },
+      });
+
+      // Then, delete all payments for this member
+      await tx.payment.deleteMany({
+        where: { memberId: memberId },
+      });
+
+      // Finally, delete the member
+      const deletedMember = await tx.member.delete({
+        where: { id: memberId },
+      });
+
+      return deletedMember;
     });
 
-    return NextResponse.json({ success: true, member: updated });
+    return NextResponse.json({ success: true, member: result });
   } catch (error) {
     console.error("DELETE error:", error);
-    return NextResponse.json({ error: "Soft delete failed" }, { status: 500 });
+    return NextResponse.json({ error: "Delete failed" }, { status: 500 });
   }
 }
 
