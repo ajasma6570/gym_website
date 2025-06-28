@@ -10,35 +10,107 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-// import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Payment } from "@/types";
+import { Payment, PlanHistory } from "@/types";
 
 interface PaymentHistoryTableProps {
   payments: Payment[];
+  planHistories?: PlanHistory[];
 }
 
 export default function PaymentHistoryTable({
   payments,
+  planHistories = [],
 }: PaymentHistoryTableProps) {
-  // Sort payments by date (most recent first)
   const sortedPayments = [...payments].sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   );
 
-  //   const getPaymentMethodBadge = (method: PaymentMethod) => {
-  //     const variants = {
-  //       cash: "bg-green-100 text-green-800 hover:bg-green-200",
-  //       card: "bg-blue-100 text-blue-800 hover:bg-blue-200",
-  //       upi: "bg-purple-100 text-purple-800 hover:bg-purple-200",
-  //     };
+  const getPlanTypeBadge = (payment: Payment) => {
+    console.log("Payment:", payment);
+    console.log("Plan histories:", planHistories);
 
-  //     return (
-  //       <Badge className={variants[method]} variant="secondary">
-  //         {method.toUpperCase()}
-  //       </Badge>
-  //     );
-  //   };
+    if (!planHistories || planHistories.length === 0) {
+      return <span>No Plans Data</span>;
+    }
+
+    const paymentDate = new Date(payment.date);
+    const oneHourBefore = new Date(paymentDate.getTime() - 60 * 60 * 1000);
+    const oneHourAfter = new Date(paymentDate.getTime() + 60 * 60 * 1000);
+
+    let relatedPlans = planHistories.filter((planHistory) => {
+      const planStartDate = new Date(planHistory.startDate);
+      return planStartDate >= oneHourBefore && planStartDate <= oneHourAfter;
+    });
+
+    if (relatedPlans.length === 0) {
+      const paymentDateOnly = paymentDate.toDateString();
+      relatedPlans = planHistories.filter((planHistory) => {
+        const planStartDate = new Date(planHistory.startDate);
+        return planStartDate.toDateString() === paymentDateOnly;
+      });
+    }
+
+    if (relatedPlans.length === 0) {
+      const sevenDaysBefore = new Date(
+        paymentDate.getTime() - 7 * 24 * 60 * 60 * 1000
+      );
+      const sevenDaysAfter = new Date(
+        paymentDate.getTime() + 7 * 24 * 60 * 60 * 1000
+      );
+      relatedPlans = planHistories.filter((planHistory) => {
+        const planStartDate = new Date(planHistory.startDate);
+        return (
+          planStartDate >= sevenDaysBefore && planStartDate <= sevenDaysAfter
+        );
+      });
+    }
+
+    if (relatedPlans.length === 0) {
+      const allMembershipPlans = planHistories.filter(
+        (plan) => plan.plan?.type === "membership_plan"
+      );
+      const allPersonalTrainingPlans = planHistories.filter(
+        (plan) => plan.plan?.type === "personal_training"
+      );
+
+      if (
+        allMembershipPlans.length > 0 &&
+        allPersonalTrainingPlans.length > 0
+      ) {
+        return <span>Both Plans</span>;
+      } else if (allMembershipPlans.length > 0) {
+        return <span>Membership</span>;
+      } else if (allPersonalTrainingPlans.length > 0) {
+        return <span> Personal Training</span>;
+      } else {
+        return <span>N/A</span>;
+      }
+    }
+
+    // Check what types of plans are included
+    const hasMembership = relatedPlans.some(
+      (plan) => plan.plan?.type === "membership_plan"
+    );
+    const hasPersonalTraining = relatedPlans.some(
+      (plan) => plan.plan?.type === "personal_training"
+    );
+
+    if (hasMembership && hasPersonalTraining) {
+      return (
+        <div className="flex gap-1 flex-wrap">
+          <span>Membership</span>
+          <span>Personal Training</span>
+        </div>
+      );
+    } else if (hasPersonalTraining) {
+      return <span>Personal Training</span>;
+    } else if (hasMembership) {
+      return <span>Membership</span>;
+    } else {
+      return <span>N/A</span>;
+    }
+  };
 
   const getTotalAmount = () => {
     return payments.reduce((total, payment) => total + payment.amount, 0);
@@ -62,20 +134,29 @@ export default function PaymentHistoryTable({
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>Payment History</CardTitle>
-        <div className="text-sm text-muted-foreground">
-          Total Payments:{" "}
-          <span className="font-semibold">${getTotalAmount()}</span>
+        <CardTitle className="text-xl font-bold">Payment History</CardTitle>
+        <div className="text-sm ">
+          <div className="flex justify-between items-center text-sm gap-4">
+            <span className="">Total Payments Made:</span>
+            <span className="font-semibold">{payments.length}</span>
+          </div>
+          <div className="flex justify-between items-center text-sm mt-1 gap-4">
+            <span className="">Total Amount Paid:</span>
+            <span className="font-semibold text-green-600 ml-auto">
+              ₹{getTotalAmount()}
+            </span>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
-        <div className="rounded-md border">
+        <div className="rounded-md border max-h-96 overflow-y-auto">
           <Table>
-            <TableHeader>
+            <TableHeader className="sticky top-0 bg-background z-10">
               <TableRow>
                 <TableHead className="w-[80px]">S.No</TableHead>
                 <TableHead>Date</TableHead>
                 <TableHead>Amount</TableHead>
+                <TableHead>Plan Type</TableHead>
                 <TableHead>Payment Method</TableHead>
                 <TableHead className="text-right">Time</TableHead>
               </TableRow>
@@ -89,33 +170,19 @@ export default function PaymentHistoryTable({
                   </TableCell>
                   <TableCell>
                     <span className="font-semibold text-green-600">
-                      {payment.amount} Rs
+                      ₹ {payment.amount}
                     </span>
                   </TableCell>
-                  <TableCell>{payment.paymentMethod}</TableCell>
+                  <TableCell>{getPlanTypeBadge(payment)}</TableCell>
+                  <TableCell>{payment.paymentMethod.toUpperCase()}</TableCell>
                   <TableCell className="text-right text-sm text-muted-foreground">
-                    {format(new Date(payment.date), "HH:mm")}
+                    {format(new Date(payment.date), "hh:mm a")}
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </div>
-
-        {payments.length > 0 && (
-          <div className="mt-4 p-3 bg-muted rounded-md">
-            <div className="flex justify-between items-center text-sm">
-              <span>Total Payments Made:</span>
-              <span className="font-semibold">{payments.length}</span>
-            </div>
-            <div className="flex justify-between items-center text-sm mt-1">
-              <span>Total Amount Paid:</span>
-              <span className="font-semibold text-green-600">
-                ${getTotalAmount()}
-              </span>
-            </div>
-          </div>
-        )}
       </CardContent>
     </Card>
   );

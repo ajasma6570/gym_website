@@ -66,6 +66,19 @@ export interface MemberWithRelations extends Member {
     })[];
 }
 
+// Payment details response type
+export interface PaymentDetailsResponse {
+    currentPlans: (PlanHistory & {
+        plan: Plan;
+    })[];
+    personalTrainingPlans: (PlanHistory & {
+        plan: Plan;
+    })[];
+    futurePlans: (PlanHistory & {
+        plan: Plan;
+    })[];
+}
+
 // Form data types for creating/updating
 export interface CreateMemberData {
     name: string;

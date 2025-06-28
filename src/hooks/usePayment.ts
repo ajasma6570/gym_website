@@ -1,6 +1,6 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PaymentFormData } from "@/lib/validation/paymentSchema";
-import { PaymentMethod } from "@/types";
+import { PaymentMethod, PaymentDetailsResponse } from "@/types";
 import { showToastMessage } from "@/lib/toast";
 
 interface PaymentRequest {
@@ -24,6 +24,32 @@ interface PaymentResponse {
         paymentMethod: PaymentMethod;
     };
 }
+
+
+export const usePaymentDetails = (memberId: string) => {
+    return useQuery<PaymentDetailsResponse>({
+        queryKey: ["payment details", memberId],
+        queryFn: async (): Promise<PaymentDetailsResponse> => {
+            const response = await fetch(`/api/payment/${memberId}`);
+            if (!response.ok) {
+                throw new Error("User not found");
+            }
+            return response.json();
+        },
+        refetchOnWindowFocus: true,
+    });
+}
+
+export const getMemberPayments = async (memberId: number): Promise<PaymentResponse[]> => {
+    const response = await fetch(`/api/payment/${memberId}`);
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to fetch payments");
+    }
+    return response.json();
+};
+
+
 
 const createPayment = async (memberId: number, paymentData: PaymentRequest): Promise<PaymentResponse> => {
     const response = await fetch(`/api/payment/${memberId}`, {
