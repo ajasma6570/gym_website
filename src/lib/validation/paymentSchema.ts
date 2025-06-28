@@ -14,7 +14,7 @@ export const paymentSchema = z.object({
         .min(1, "Due date is required")
         .regex(/^\d{4}-\d{2}-\d{2}$/, "Due date must be in YYYY-MM-DD format"),
     personalTrainingPlan: z.string().optional(),
-    paymentType: z.enum(["cash", "bank", "both"], {
+    paymentType: z.enum(["cash", "card", "upi"], {
         required_error: "Payment type is required",
     }),
     amount: z.number().min(0, "Amount must be positive"),
