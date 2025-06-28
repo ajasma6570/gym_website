@@ -152,84 +152,101 @@ export default function MemberPage() {
             {/* Current & Future Plans Section */}
             <div className="space-y-6">
               {/* Current Plans */}
-              {!paymentDetailsLoading &&
-                paymentDetails?.currentPlans &&
-                paymentDetails.currentPlans.length > 0 && (
-                  <div className="">
-                    <h3></h3>
 
-                    <Card className="gap-2">
-                      <CardHeader>
-                        <CardTitle className="text-xl font-semibold">
-                          Current Plans
-                        </CardTitle>
-                        <CardDescription></CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-2">
-                          {paymentDetails.currentPlans.map(
-                            (currentPlan: PlanHistory & { plan: Plan }) => (
-                              <div
-                                key={currentPlan.id}
-                                className="p-3 bg-background  rounded-md"
-                              >
-                                <div className="flex justify-between items-start">
-                                  <div>
-                                    <p className="font-medium text-white">
-                                      {currentPlan.plan?.name}
-                                    </p>
-                                    <p className="text-base text-white">
-                                      {currentPlan.plan?.type ===
-                                      "personal_training"
-                                        ? "Personal Training"
-                                        : "Membership"}
-                                    </p>
-                                    <p className="text-sm text-white">
-                                      ₹{currentPlan.plan?.amount}
-                                    </p>
-                                  </div>
-                                  <div className="text-right text-sm">
-                                    <p className="text-white">
-                                      {format(
-                                        new Date(currentPlan.startDate),
-                                        "dd MMM yyyy"
-                                      )}{" "}
-                                      -{" "}
-                                      {format(
-                                        new Date(currentPlan.dueDate),
-                                        "dd MMM yyyy"
-                                      )}
-                                    </p>
-                                    <p className="font-medium text-green-700">
-                                      Active
-                                    </p>
-                                  </div>
-                                </div>
+              <Card className="gap-2">
+                <CardHeader>
+                  <CardTitle className="text-xl font-semibold">
+                    Active Membership Plan
+                  </CardTitle>
+                  <CardDescription></CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {!paymentDetailsLoading &&
+                  paymentDetails?.currentPlans &&
+                  paymentDetails.currentPlans.length > 0 ? (
+                    <div className="space-y-2">
+                      {paymentDetails.currentPlans
+                        .filter(
+                          (currentPlan: PlanHistory & { plan: Plan }) =>
+                            currentPlan.plan?.type !== "personal_training"
+                        )
+                        .map((currentPlan: PlanHistory & { plan: Plan }) => (
+                          <div
+                            key={currentPlan.id}
+                            className="p-3 bg-background  rounded-md"
+                          >
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <p className="font-medium text-white">
+                                  {currentPlan.plan?.name}
+                                </p>
+                                <p className="text-base text-white">
+                                  Membership
+                                </p>
+                                <p className="text-sm text-white">
+                                  ₹{currentPlan.plan?.amount}
+                                </p>
                               </div>
-                            )
-                          )}
+                              <div className="text-right text-sm">
+                                <p className="text-white">
+                                  {format(
+                                    new Date(currentPlan.startDate),
+                                    "dd MMM yyyy"
+                                  )}{" "}
+                                  -{" "}
+                                  {format(
+                                    new Date(currentPlan.dueDate),
+                                    "dd MMM yyyy"
+                                  )}
+                                </p>
+                                <p className="font-medium text-green-700">
+                                  Active
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      {paymentDetails.currentPlans.filter(
+                        (currentPlan: PlanHistory & { plan: Plan }) =>
+                          currentPlan.plan?.type !== "personal_training"
+                      ).length === 0 && (
+                        <div className="p-3 bg-background border rounded-md">
+                          <p className="text-center">
+                            No Membership plan available.
+                          </p>
                         </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                )}
+                      )}
+                    </div>
+                  ) : (
+                    <div className="p-3 bg-background border rounded-md">
+                      <p className="text-center">
+                        No Membership plan available.
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
 
               {/*Personal Training Section */}
 
               <Card className="gap-2">
                 <CardHeader>
                   <CardTitle className="text-xl font-semibold">
-                    Personal Training Plans
+                    Active Personal Training Plan
                   </CardTitle>
                   <CardDescription></CardDescription>
                 </CardHeader>
                 <CardContent>
                   {!paymentDetailsLoading &&
-                  paymentDetails?.personalTrainingPlans &&
-                  paymentDetails.personalTrainingPlans.length > 0 ? (
+                  paymentDetails?.currentPlans &&
+                  paymentDetails.currentPlans.length > 0 ? (
                     <div className="space-y-2">
-                      {paymentDetails.personalTrainingPlans.map(
-                        (ptPlan: PlanHistory & { plan: Plan }) => (
+                      {paymentDetails.currentPlans
+                        .filter(
+                          (ptPlan: PlanHistory & { plan: Plan }) =>
+                            ptPlan.plan?.type === "personal_training"
+                        )
+                        .map((ptPlan: PlanHistory & { plan: Plan }) => (
                           <div
                             key={ptPlan.id}
                             className="p-3 bg-background rounded-md"
@@ -238,6 +255,9 @@ export default function MemberPage() {
                               <div>
                                 <p className="font-medium text-white">
                                   {ptPlan.plan?.name}
+                                </p>
+                                <p className="text-base text-white">
+                                  Personal Training
                                 </p>
                                 <p className="text-sm text-white">
                                   ₹{ptPlan.plan?.amount}
@@ -261,7 +281,16 @@ export default function MemberPage() {
                               </div>
                             </div>
                           </div>
-                        )
+                        ))}
+                      {paymentDetails.currentPlans.filter(
+                        (ptPlan: PlanHistory & { plan: Plan }) =>
+                          ptPlan.plan?.type === "personal_training"
+                      ).length === 0 && (
+                        <div className="p-3 bg-background border rounded-md">
+                          <p className="text-center">
+                            No personal training plan available.
+                          </p>
+                        </div>
                       )}
                     </div>
                   ) : (
@@ -278,7 +307,7 @@ export default function MemberPage() {
               <Card className="gap-2">
                 <CardHeader>
                   <CardTitle className="text-xl font-semibold">
-                    Future Plans
+                    Future Membership Plan
                   </CardTitle>
                   <CardDescription></CardDescription>
                 </CardHeader>
@@ -288,15 +317,31 @@ export default function MemberPage() {
                   paymentDetails.futurePlans.length > 0 ? (
                     <div className="space-y-2">
                       {(() => {
-                        const latestFuturePlan =
-                          paymentDetails.futurePlans.sort(
+                        const futureMembershipPlans = paymentDetails.futurePlans
+                          .filter(
+                            (plan: PlanHistory & { plan: Plan }) =>
+                              plan.plan?.type !== "personal_training"
+                          )
+                          .sort(
                             (
                               a: PlanHistory & { plan: Plan },
                               b: PlanHistory & { plan: Plan }
                             ) =>
                               new Date(a.startDate).getTime() -
                               new Date(b.startDate).getTime()
-                          )[0];
+                          );
+
+                        if (futureMembershipPlans.length === 0) {
+                          return (
+                            <div className="p-3 bg-background border rounded-md">
+                              <p className="text-center">
+                                No future membership plan available.
+                              </p>
+                            </div>
+                          );
+                        }
+
+                        const latestFuturePlan = futureMembershipPlans[0];
 
                         return (
                           <div
@@ -309,10 +354,7 @@ export default function MemberPage() {
                                   {latestFuturePlan.plan?.name}
                                 </p>
                                 <p className="text-base text-white">
-                                  {latestFuturePlan.plan?.type ===
-                                  "personal_training"
-                                    ? "Personal Training"
-                                    : "Membership"}
+                                  Membership
                                 </p>
                                 <p className="text-sm text-white">
                                   ₹{latestFuturePlan.plan?.amount}
@@ -341,7 +383,99 @@ export default function MemberPage() {
                     </div>
                   ) : (
                     <div className="p-3 bg-background border rounded-md">
-                      <p className="text-center">No future plan available.</p>
+                      <p className="text-center">
+                        No future membership plan available.
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Future Personal Training Plans */}
+              <Card className="gap-2">
+                <CardHeader>
+                  <CardTitle className="text-xl font-semibold">
+                    Future Personal Training Plan
+                  </CardTitle>
+                  <CardDescription></CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {!paymentDetailsLoading &&
+                  paymentDetails?.futurePlans &&
+                  paymentDetails.futurePlans.length > 0 ? (
+                    <div className="space-y-2">
+                      {(() => {
+                        const futurePersonalTrainingPlans =
+                          paymentDetails.futurePlans
+                            .filter(
+                              (plan: PlanHistory & { plan: Plan }) =>
+                                plan.plan?.type === "personal_training"
+                            )
+                            .sort(
+                              (
+                                a: PlanHistory & { plan: Plan },
+                                b: PlanHistory & { plan: Plan }
+                              ) =>
+                                new Date(a.startDate).getTime() -
+                                new Date(b.startDate).getTime()
+                            );
+
+                        if (futurePersonalTrainingPlans.length === 0) {
+                          return (
+                            <div className="p-3 bg-background border rounded-md">
+                              <p className="text-center">
+                                No future personal training plan available.
+                              </p>
+                            </div>
+                          );
+                        }
+
+                        const latestFuturePTPlan =
+                          futurePersonalTrainingPlans[0];
+
+                        return (
+                          <div
+                            key={latestFuturePTPlan.id}
+                            className="p-3 bg-background  rounded-md"
+                          >
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <p className="font-medium text-white">
+                                  {latestFuturePTPlan.plan?.name}
+                                </p>
+                                <p className="text-base text-white">
+                                  Personal Training
+                                </p>
+                                <p className="text-sm text-white">
+                                  ₹{latestFuturePTPlan.plan?.amount}
+                                </p>
+                              </div>
+                              <div className="text-right text-sm">
+                                <p className="text-white">
+                                  {format(
+                                    new Date(latestFuturePTPlan.startDate),
+                                    "dd MMM yyyy"
+                                  )}{" "}
+                                  -{" "}
+                                  {format(
+                                    new Date(latestFuturePTPlan.dueDate),
+                                    "dd MMM yyyy"
+                                  )}
+                                </p>
+                                <p className="font-medium text-green-700">
+                                  Upcoming
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  ) : (
+                    <div className="p-3 bg-background border rounded-md">
+                      <p className="text-center">
+                        No future personal training plan available.
+                      </p>
                     </div>
                   )}
                 </CardContent>

@@ -4,7 +4,7 @@ import { addDays } from "date-fns";
 import { PaymentMethod } from "@prisma/client";
 
 interface PaymentBody {
-  planId: number;
+  planId?: number;
   personalTrainingPlanId?: number;
   paymentStart: string;
   amount: number;
@@ -45,8 +45,14 @@ export async function GET(
       orderBy: { startDate: "asc" },
     });
 
+    // Split current plans by type for the UI
+    const personalTrainingPlans = currentPlans.filter(
+      plan => plan.plan.type === "personal_training"
+    );
+
     return NextResponse.json({
       currentPlans,
+      personalTrainingPlans,
       futurePlans,
     });
   } catch (error) {
@@ -59,14 +65,6 @@ export async function GET(
 }
 
 
-
-interface PaymentBody {
-  planId: number;
-  personalTrainingPlanId?: number;
-  paymentStart: string; // ISO format
-  amount: number;
-  paymentMethod?: PaymentMethod;
-}
 
 export async function POST(
   req: NextRequest,
@@ -89,59 +87,84 @@ export async function POST(
       paymentMethod,
     } = body;
 
-    const startDate = new Date(paymentStart);
-
-    // 1. Fetch current active membership plan (if any)
-    const currentActive = await prisma.planHistory.findFirst({
-      where: {
-        memberId,
-        plan: { type: "membership_plan" },
-        startDate: { lte: new Date() },
-        dueDate: { gte: new Date() },
-      },
-      orderBy: { dueDate: "desc" },
-    });
-
-    // 2. Fetch selected plan
-    const membershipPlan = await prisma.plan.findUnique({ where: { id: planId } });
-    if (!membershipPlan) {
-      return NextResponse.json({ error: "Membership plan not found" }, { status: 400 });
-    }
-
-    // 3. Check if startDate overlaps with current plan
-    if (currentActive && startDate <= currentActive.dueDate) {
+    // Validate that at least one plan is selected
+    if (!planId && !personalTrainingPlanId) {
       return NextResponse.json(
-        {
-          error: `Current plan is active until ${currentActive.dueDate.toDateString()}. Please choose a start date after that.`,
-        },
+        { error: "At least one plan (membership or personal training) must be selected" },
         { status: 400 }
       );
     }
 
-    const dueDate = addDays(startDate, membershipPlan.duration);
+    const startDate = new Date(paymentStart);
+    let membershipPlanHistory = null;
+    let personalTrainingPlanHistory = null;
 
-    // 4. Create membership plan history
-    const membershipPlanHistory = await prisma.planHistory.create({
-      data: {
-        memberId,
-        planId,
-        startDate,
-        dueDate,
-      },
-    });
+    // Handle membership plan if selected
+    if (planId) {
+      // 1. Fetch current active membership plan (if any)
+      const currentActive = await prisma.planHistory.findFirst({
+        where: {
+          memberId,
+          plan: { type: "membership_plan" },
+          startDate: { lte: new Date() },
+          dueDate: { gte: new Date() },
+        },
+        orderBy: { dueDate: "desc" },
+      });
 
-    // 5. Update activePlanId ONLY if there is no current active
-    if (!currentActive || currentActive.dueDate < new Date()) {
-      await prisma.member.update({
-        where: { id: memberId },
+      // 2. Fetch selected membership plan
+      const membershipPlan = await prisma.plan.findUnique({ where: { id: planId } });
+      if (!membershipPlan) {
+        return NextResponse.json({ error: "Membership plan not found" }, { status: 400 });
+      }
+
+      // 3. Check if startDate overlaps with current plan
+      if (currentActive && startDate <= currentActive.dueDate) {
+        return NextResponse.json(
+          {
+            error: `Current membership plan is active until ${currentActive.dueDate.toDateString()}. Please choose a start date after that.`,
+          },
+          { status: 400 }
+        );
+      }
+
+      const membershipDueDate = addDays(startDate, membershipPlan.duration);
+
+      // 4. Create membership plan history
+      membershipPlanHistory = await prisma.planHistory.create({
         data: {
-          activePlanId: membershipPlanHistory.id,
+          memberId,
+          planId,
+          startDate,
+          dueDate: membershipDueDate,
         },
       });
+
+      // 5. Update activePlanId ONLY if there is no current active membership plan
+      if (!currentActive || currentActive.dueDate < new Date()) {
+        await prisma.member.update({
+          where: { id: memberId },
+          data: {
+            activePlanId: membershipPlanHistory.id,
+          },
+        });
+      }
     }
 
-    // 6. Handle optional personal training plan
+    // Handle personal training plan if selected
     if (personalTrainingPlanId) {
+      // 1. Fetch current active personal training plans (if any)
+      const currentActivePT = await prisma.planHistory.findFirst({
+        where: {
+          memberId,
+          plan: { type: "personal_training" },
+          startDate: { lte: new Date() },
+          dueDate: { gte: new Date() },
+        },
+        orderBy: { dueDate: "desc" },
+      });
+
+      // 2. Fetch selected personal training plan
       const personalPlan = await prisma.plan.findUnique({
         where: { id: personalTrainingPlanId },
       });
@@ -150,9 +173,20 @@ export async function POST(
         return NextResponse.json({ error: "Personal training plan not found" }, { status: 400 });
       }
 
+      // 3. Check if startDate overlaps with current PT plan
+      if (currentActivePT && startDate <= currentActivePT.dueDate) {
+        return NextResponse.json(
+          {
+            error: `Current personal training plan is active until ${currentActivePT.dueDate.toDateString()}. Please choose a start date after that.`,
+          },
+          { status: 400 }
+        );
+      }
+
       const personalDueDate = addDays(startDate, personalPlan.duration);
 
-      await prisma.planHistory.create({
+      // 4. Create personal training plan history
+      personalTrainingPlanHistory = await prisma.planHistory.create({
         data: {
           memberId,
           planId: personalTrainingPlanId,
@@ -162,23 +196,25 @@ export async function POST(
       });
     }
 
-    // 7. Record the payment
+    // 6. Record the payment
     const payment = await prisma.payment.create({
       data: {
         memberId,
         amount,
         date: new Date(),
-        paymentMethod,
+        paymentMethod: paymentMethod || "cash",
       },
     });
 
     return NextResponse.json(
       {
-        message: "Plan scheduled successfully",
-        activeImmediately: !currentActive || currentActive.dueDate < new Date(),
+        message: "Payment processed successfully",
+        activeImmediately: true,
         planStart: startDate,
-        planDue: dueDate,
+        planDue: membershipPlanHistory?.dueDate || personalTrainingPlanHistory?.dueDate,
         payment,
+        membershipPlan: membershipPlanHistory,
+        personalTrainingPlan: personalTrainingPlanHistory,
       },
       { status: 201 }
     );

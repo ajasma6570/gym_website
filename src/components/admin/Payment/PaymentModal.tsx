@@ -31,9 +31,13 @@ import { Button } from "@/components/ui/button";
 import { Loader2Icon } from "lucide-react";
 import { paymentSchema, PaymentFormData } from "@/lib/validation/paymentSchema";
 import { usePlanList } from "@/hooks/usePlan";
-import { usePaymentCreate, transformPaymentFormData } from "@/hooks/usePayment";
+import {
+  usePaymentCreate,
+  usePaymentDetails,
+  transformPaymentFormData,
+} from "@/hooks/usePayment";
 import modalContext from "@/context/ModalContext";
-import { Plan } from "@/types";
+import { Plan, PlanHistory } from "@/types";
 import { showToastMessage } from "@/lib/toast";
 
 export default function PaymentModal() {
@@ -46,7 +50,64 @@ export default function PaymentModal() {
     error: paymentError,
   } = usePaymentCreate();
 
-  // Get appropriate start date based on member's active plan
+  // Get payment details to check for active plans
+  const { data: paymentDetails } = usePaymentDetails(
+    paymentFormModal.memberData?.id?.toString() || ""
+  );
+
+  // Get appropriate start date for membership plans
+  const getMembershipPaymentStartDate = useCallback(() => {
+    if (!paymentDetails?.currentPlans)
+      return new Date().toISOString().split("T")[0];
+
+    // Check for active membership plans
+    const activeMembershipPlan = paymentDetails.currentPlans.find(
+      (plan: PlanHistory & { plan: Plan }) =>
+        plan.plan.type === "membership_plan"
+    );
+
+    if (activeMembershipPlan?.dueDate) {
+      const dueDate = new Date(activeMembershipPlan.dueDate);
+      const nextDay = new Date(dueDate);
+      nextDay.setDate(nextDay.getDate() + 1);
+      return nextDay.toISOString().split("T")[0];
+    }
+
+    // If no active membership plan, use today's date
+    return new Date().toISOString().split("T")[0];
+  }, [paymentDetails]);
+
+  // Get appropriate start date for personal training plans
+  const getPersonalTrainingPaymentStartDate = useCallback(() => {
+    if (!paymentDetails?.personalTrainingPlans)
+      return new Date().toISOString().split("T")[0];
+
+    // Check for active personal training plans
+    const activePTPlans = paymentDetails.personalTrainingPlans;
+
+    if (activePTPlans.length > 0) {
+      // Find the latest expiring PT plan
+      const latestPTPlan = activePTPlans.reduce(
+        (
+          latest: PlanHistory & { plan: Plan },
+          current: PlanHistory & { plan: Plan }
+        ) =>
+          new Date(current.dueDate) > new Date(latest.dueDate)
+            ? current
+            : latest
+      );
+
+      const dueDate = new Date(latestPTPlan.dueDate);
+      const nextDay = new Date(dueDate);
+      nextDay.setDate(nextDay.getDate() + 1);
+      return nextDay.toISOString().split("T")[0];
+    }
+
+    // If no active PT plan, use today's date
+    return new Date().toISOString().split("T")[0];
+  }, [paymentDetails]);
+
+  // Get general payment start date (kept for backward compatibility)
   const getPaymentStartDate = useCallback(() => {
     if (paymentFormModal.memberData?.activePlan?.dueDate) {
       const activePlanDueDate = new Date(
@@ -66,6 +127,8 @@ export default function PaymentModal() {
     defaultValues: {
       planId: 0,
       personalTrainingId: 0,
+      membershipPaymentStart: "",
+      personalTrainingPaymentStart: "",
       paymentStart: getPaymentStartDate(),
       dueDate: "",
       personalTrainingPlan: "",
@@ -78,6 +141,10 @@ export default function PaymentModal() {
   const watchedPlanId = form.watch("planId");
   const watchedPersonalTrainingId = form.watch("personalTrainingId");
   const watchedPaymentStart = form.watch("paymentStart");
+  const watchedMembershipPaymentStart = form.watch("membershipPaymentStart");
+  const watchedPersonalTrainingPaymentStart = form.watch(
+    "personalTrainingPaymentStart"
+  );
 
   // Function to calculate due date based on payment start and selected plan
   const calculateDueDate = useCallback(
@@ -89,7 +156,7 @@ export default function PaymentModal() {
 
       const startDate = new Date(paymentStartDate);
       const dueDate = new Date(startDate);
-      dueDate.setMonth(dueDate.getMonth() + selectedPlan.duration);
+      dueDate.setDate(dueDate.getDate() + selectedPlan.duration);
 
       return dueDate.toISOString().split("T")[0];
     },
@@ -98,21 +165,132 @@ export default function PaymentModal() {
 
   // Auto-calculate due date when plan or payment start changes
   useEffect(() => {
-    if (watchedPlanId && watchedPaymentStart) {
-      const newDueDate = calculateDueDate(watchedPaymentStart, watchedPlanId);
-      if (newDueDate) {
-        form.setValue("dueDate", newDueDate);
+    let newDueDate = "";
+
+    // Calculate due date for membership plan
+    if (watchedPlanId && watchedPlanId > 0 && watchedPaymentStart) {
+      newDueDate = calculateDueDate(watchedPaymentStart, watchedPlanId);
+    }
+
+    // Calculate due date for personal training plan if no membership plan
+    if (
+      !newDueDate &&
+      watchedPersonalTrainingId &&
+      watchedPersonalTrainingId > 0 &&
+      watchedPaymentStart
+    ) {
+      newDueDate = calculateDueDate(
+        watchedPaymentStart,
+        watchedPersonalTrainingId
+      );
+    }
+
+    // If we have both plans, use the longer duration
+    if (
+      watchedPlanId &&
+      watchedPlanId > 0 &&
+      watchedPersonalTrainingId &&
+      watchedPersonalTrainingId > 0 &&
+      watchedPaymentStart
+    ) {
+      const membershipDueDate = calculateDueDate(
+        watchedPaymentStart,
+        watchedPlanId
+      );
+      const ptDueDate = calculateDueDate(
+        watchedPaymentStart,
+        watchedPersonalTrainingId
+      );
+
+      if (membershipDueDate && ptDueDate) {
+        newDueDate =
+          membershipDueDate > ptDueDate ? membershipDueDate : ptDueDate;
       }
     }
-  }, [watchedPlanId, watchedPaymentStart, calculateDueDate, form]);
 
-  // Auto-update payment start date when plan is selected
+    if (newDueDate) {
+      form.setValue("dueDate", newDueDate);
+      // Force revalidation to ensure form validity is updated
+      form.trigger();
+    }
+  }, [
+    watchedPlanId,
+    watchedPersonalTrainingId,
+    watchedPaymentStart,
+    calculateDueDate,
+    form,
+  ]);
+
+  // Auto-update separate payment start dates when plans are selected
   useEffect(() => {
     if (watchedPlanId && paymentFormModal.isOpen) {
-      const newStartDate = getPaymentStartDate();
-      form.setValue("paymentStart", newStartDate);
+      const newStartDate = getMembershipPaymentStartDate();
+      form.setValue("membershipPaymentStart", newStartDate);
     }
-  }, [watchedPlanId, getPaymentStartDate, form, paymentFormModal.isOpen]);
+  }, [
+    watchedPlanId,
+    getMembershipPaymentStartDate,
+    form,
+    paymentFormModal.isOpen,
+  ]);
+
+  useEffect(() => {
+    if (watchedPersonalTrainingId && paymentFormModal.isOpen) {
+      const newStartDate = getPersonalTrainingPaymentStartDate();
+      form.setValue("personalTrainingPaymentStart", newStartDate);
+    }
+  }, [
+    watchedPersonalTrainingId,
+    getPersonalTrainingPaymentStartDate,
+    form,
+    paymentFormModal.isOpen,
+  ]);
+
+  // Update the general payment start date based on the earliest of the two
+  useEffect(() => {
+    if (paymentFormModal.isOpen) {
+      let earliestDate = "";
+
+      if (
+        watchedMembershipPaymentStart &&
+        watchedPersonalTrainingPaymentStart
+      ) {
+        earliestDate =
+          watchedMembershipPaymentStart <= watchedPersonalTrainingPaymentStart
+            ? watchedMembershipPaymentStart
+            : watchedPersonalTrainingPaymentStart;
+      } else if (watchedMembershipPaymentStart) {
+        earliestDate = watchedMembershipPaymentStart;
+      } else if (watchedPersonalTrainingPaymentStart) {
+        earliestDate = watchedPersonalTrainingPaymentStart;
+      } else {
+        // Fallback: if no specific dates are set but plans are selected, use appropriate default
+        if (watchedPlanId && watchedPlanId > 0) {
+          earliestDate = getMembershipPaymentStartDate();
+        } else if (watchedPersonalTrainingId && watchedPersonalTrainingId > 0) {
+          earliestDate = getPersonalTrainingPaymentStartDate();
+        } else {
+          earliestDate = getPaymentStartDate();
+        }
+      }
+
+      if (earliestDate) {
+        form.setValue("paymentStart", earliestDate);
+        // Force revalidation when payment start date changes
+        form.trigger();
+      }
+    }
+  }, [
+    watchedMembershipPaymentStart,
+    watchedPersonalTrainingPaymentStart,
+    watchedPlanId,
+    watchedPersonalTrainingId,
+    getMembershipPaymentStartDate,
+    getPersonalTrainingPaymentStartDate,
+    getPaymentStartDate,
+    form,
+    paymentFormModal.isOpen,
+  ]);
 
   // Auto-set amount when plan or personal training changes
   useEffect(() => {
@@ -120,7 +298,7 @@ export default function PaymentModal() {
       let totalAmount = 0;
 
       // Add membership plan amount
-      if (watchedPlanId) {
+      if (watchedPlanId && watchedPlanId > 0) {
         const selectedPlan = plans.find(
           (plan: Plan) => plan.id === watchedPlanId
         );
@@ -130,7 +308,7 @@ export default function PaymentModal() {
       }
 
       // Add personal training plan amount
-      if (watchedPersonalTrainingId) {
+      if (watchedPersonalTrainingId && watchedPersonalTrainingId > 0) {
         const selectedPT = plans.find(
           (plan: Plan) => plan.id === watchedPersonalTrainingId
         );
@@ -140,6 +318,8 @@ export default function PaymentModal() {
       }
 
       form.setValue("amount", totalAmount);
+      // Force revalidation to ensure form validity is updated
+      form.trigger();
     }
   }, [watchedPlanId, watchedPersonalTrainingId, plans, form]);
 
@@ -155,6 +335,8 @@ export default function PaymentModal() {
     form.reset({
       planId: 0,
       personalTrainingId: 0,
+      membershipPaymentStart: "",
+      personalTrainingPaymentStart: "",
       paymentStart: startDate,
       dueDate: "",
       personalTrainingPlan: "",
@@ -179,6 +361,8 @@ export default function PaymentModal() {
       form.reset({
         planId: 0,
         personalTrainingId: 0,
+        membershipPaymentStart: "",
+        personalTrainingPaymentStart: "",
         paymentStart: startDate,
         dueDate: "",
         personalTrainingPlan: "",
@@ -241,44 +425,80 @@ export default function PaymentModal() {
             <div className="flex-1 overflow-y-auto px-1 space-y-8 mb-4">
               {/* Member Info Display */}
               {member && (
-                <div className="p-3 bg-muted rounded-md">
+                <div className="p-3 bg-muted rounded-md space-y-2">
                   <h4 className="font-medium">Member: {member.name}</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Current Plan:{" "}
-                    {member.activePlan?.plan?.name || "No active plan"}
-                    {member.activePlan?.dueDate && (
-                      <span className="ml-2">
-                        (Expires:{" "}
-                        {new Date(
-                          member.activePlan.dueDate
-                        ).toLocaleDateString()}
-                        )
-                      </span>
-                    )}
-                  </p>
+                  <div className="text-sm text-muted-foreground space-y-1">
+                    <div>
+                      <span className="font-medium">Membership Plan:</span>{" "}
+                      {paymentDetails?.currentPlans?.find(
+                        (plan: PlanHistory & { plan: Plan }) =>
+                          plan.plan.type === "membership_plan"
+                      )?.plan?.name || "No active membership"}
+                      {paymentDetails?.currentPlans?.find(
+                        (plan: PlanHistory & { plan: Plan }) =>
+                          plan.plan.type === "membership_plan"
+                      )?.dueDate && (
+                        <span className="ml-2">
+                          (Expires:{" "}
+                          {new Date(
+                            paymentDetails.currentPlans.find(
+                              (plan: PlanHistory & { plan: Plan }) =>
+                                plan.plan.type === "membership_plan"
+                            )!.dueDate
+                          ).toLocaleDateString()}
+                          )
+                        </span>
+                      )}
+                    </div>
+                    <div>
+                      <span className="font-medium">Personal Training:</span>{" "}
+                      {(paymentDetails?.personalTrainingPlans?.length ?? 0) > 0
+                        ? `${paymentDetails?.personalTrainingPlans?.length} active plan(s)`
+                        : "No active PT plans"}
+                      {(paymentDetails?.personalTrainingPlans?.length ?? 0) >
+                        0 &&
+                        paymentDetails?.personalTrainingPlans && (
+                          <span className="ml-2">
+                            (Latest expires:{" "}
+                            {new Date(
+                              Math.max(
+                                ...paymentDetails.personalTrainingPlans.map(
+                                  (p: PlanHistory & { plan: Plan }) =>
+                                    new Date(p.dueDate).getTime()
+                                )
+                              )
+                            ).toLocaleDateString()}
+                            )
+                          </span>
+                        )}
+                    </div>
+                  </div>
                 </div>
               )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Plan Selection */}
+                {/* Membership Plan Selection */}
                 <FormField
                   name="planId"
                   control={form.control}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Select Membership Plan</FormLabel>
+                      <FormLabel>Select Membership Plan (Optional)</FormLabel>
                       <FormControl>
                         <Select
                           value={field.value?.toString()}
                           onValueChange={(value) =>
-                            field.onChange(Number(value))
+                            field.onChange(value === "0" ? 0 : Number(value))
                           }
                           disabled={plansLoading}
                         >
                           <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select a membership plan" />
+                            <SelectValue placeholder="Select a membership plan (optional)" />
                           </SelectTrigger>
                           <SelectContent>
+                            <SelectItem value="0">
+                              No Membership Plan
+                            </SelectItem>
                             {plans
                               .filter(
                                 (plan: Plan) =>
@@ -290,7 +510,7 @@ export default function PaymentModal() {
                                   key={plan.id}
                                   value={plan.id.toString()}
                                 >
-                                  {plan.name} - {plan.duration} days - $
+                                  {plan.name} - {plan.duration} days - ₹
                                   {plan.amount}
                                 </SelectItem>
                               ))}
@@ -308,12 +528,7 @@ export default function PaymentModal() {
                   control={form.control}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>
-                        Personal Training Plan{" "}
-                        <span className="text-muted-foreground">
-                          (Optional)
-                        </span>
-                      </FormLabel>
+                      <FormLabel>Personal Training Plan (Optional)</FormLabel>
                       <FormControl>
                         <Select
                           value={field.value?.toString()}
@@ -340,7 +555,7 @@ export default function PaymentModal() {
                                   key={plan.id}
                                   value={plan.id.toString()}
                                 >
-                                  {plan.name} - {plan.duration} days - $
+                                  {plan.name} - {plan.duration} days - ₹
                                   {plan.amount}
                                 </SelectItem>
                               ))}
@@ -353,34 +568,115 @@ export default function PaymentModal() {
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Payment Start Date */}
-                <FormField
-                  name="paymentStart"
-                  control={form.control}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Payment Start Date</FormLabel>
-                      <FormControl>
-                        <Input
-                          min={formattedDate}
-                          type="date"
-                          placeholder="Select payment start date"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              {/* Separate Start Date Fields */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Membership Payment Start Date */}
+                {watchedPlanId && watchedPlanId > 0 && (
+                  <FormField
+                    name="membershipPaymentStart"
+                    control={form.control}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Membership Payment Start Date</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="date"
+                            placeholder="Select membership start date"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
 
+                {/* Personal Training Payment Start Date */}
+                {watchedPersonalTrainingId && watchedPersonalTrainingId > 0 && (
+                  <FormField
+                    name="personalTrainingPaymentStart"
+                    control={form.control}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          Personal Training Payment Start Date
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type="date"
+                            placeholder="Select PT start date"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+              </div>
+
+              {/* Plan Selection Summary */}
+              {((watchedPlanId && watchedPlanId > 0) ||
+                (watchedPersonalTrainingId &&
+                  watchedPersonalTrainingId > 0)) && (
+                <div className="p-3 bg-muted rounded-md">
+                  <h5 className="font-medium mb-2">Selected Plans Summary</h5>
+                  <div className="space-y-2 text-sm">
+                    {watchedPlanId && watchedPlanId > 0 && (
+                      <div className="flex justify-between">
+                        <span>
+                          <strong>Membership:</strong>{" "}
+                          {
+                            plans.find((p: Plan) => p.id === watchedPlanId)
+                              ?.name
+                          }
+                        </span>
+                        <span>
+                          ₹
+                          {
+                            plans.find((p: Plan) => p.id === watchedPlanId)
+                              ?.amount
+                          }
+                        </span>
+                      </div>
+                    )}
+                    {watchedPersonalTrainingId &&
+                      watchedPersonalTrainingId > 0 && (
+                        <div className="flex justify-between">
+                          <span>
+                            <strong>Personal Training:</strong>{" "}
+                            {
+                              plans.find(
+                                (p: Plan) => p.id === watchedPersonalTrainingId
+                              )?.name
+                            }
+                          </span>
+                          <span>
+                            ₹
+                            {
+                              plans.find(
+                                (p: Plan) => p.id === watchedPersonalTrainingId
+                              )?.amount
+                            }
+                          </span>
+                        </div>
+                      )}
+                    <div className="border-t pt-2 flex justify-between font-medium">
+                      <span>Total Amount:</span>
+                      <span>₹{form.watch("amount")}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Amount */}
                 <FormField
                   name="amount"
                   control={form.control}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Total Amount ($)</FormLabel>
+                      <FormLabel>Total Amount (₹)</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -439,7 +735,11 @@ export default function PaymentModal() {
                   {paymentError.message}
                 </div>
               )}
-              <Button type="submit" disabled={isPaymentPending}>
+
+              <Button
+                type="submit"
+                disabled={isPaymentPending || !form.formState.isValid}
+              >
                 {isPaymentPending ? (
                   <>
                     <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />

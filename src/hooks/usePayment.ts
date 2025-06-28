@@ -4,7 +4,7 @@ import { PaymentMethod, PaymentDetailsResponse } from "@/types";
 import { showToastMessage } from "@/lib/toast";
 
 interface PaymentRequest {
-    planId: number;
+    planId?: number;
     personalTrainingPlanId?: number;
     paymentStart: string;
     amount: number;
@@ -91,7 +91,7 @@ export const usePaymentCreate = () => {
 // Helper function to transform PaymentFormData to PaymentRequest
 export const transformPaymentFormData = (formData: PaymentFormData): PaymentRequest => {
     return {
-        planId: formData.planId,
+        planId: formData.planId && formData.planId > 0 ? formData.planId : undefined,
         personalTrainingPlanId: formData.personalTrainingId && formData.personalTrainingId > 0
             ? formData.personalTrainingId
             : undefined,

@@ -108,8 +108,10 @@ export interface UpdatePlanData extends CreatePlanData {
 
 // Payment form types
 export interface PaymentFormData {
-    planId: number;
+    planId?: number;
     personalTrainingId?: number;
+    membershipPaymentStart?: string; // Date string in YYYY-MM-DD format
+    personalTrainingPaymentStart?: string; // Date string in YYYY-MM-DD format
     paymentStart: string; // Date string in YYYY-MM-DD format
     dueDate: string; // Date string in YYYY-MM-DD format
     personalTrainingPlan?: string;
