@@ -69,9 +69,6 @@ export default function UserForm() {
   const handleSubmit = useCallback(
     async (values: FormData) => {
       try {
-        console.log("Form values:", values);
-        console.log("Modal mode:", userFormModal);
-
         // Convert string values to numbers for numeric fields
         const formattedValues = {
           name: values.name,
@@ -88,11 +85,8 @@ export default function UserForm() {
             ...formattedValues,
             id: userFormModal.userData?.id,
           };
-          console.log("Update data:", updateData);
           updateUser(updateData);
         } else {
-          // For create mode, don't include ID (Prisma will auto-generate)
-          console.log("Create data:", formattedValues);
           createUser(formattedValues);
         }
       } catch (error) {
@@ -120,8 +114,6 @@ export default function UserForm() {
     if (!userFormModal.isOpen) return;
 
     if (userFormModal.mode === "edit" && userFormModal.userData) {
-      console.log("user data----->", userFormModal.userData);
-
       const data = userFormModal.userData;
 
       form.reset({
@@ -174,7 +166,7 @@ export default function UserForm() {
 
   return (
     <Dialog open={userFormModal.isOpen} onOpenChange={handleModalClose}>
-      <DialogContent className="sm:max-w-4xl max-h-[90vh] flex flex-col">
+      <DialogContent className="sm:max-w-4xl max-h-[90vh] flex flex-col overflow-auto">
         <DialogHeader>
           <DialogTitle>{dialogTitle}</DialogTitle>
         </DialogHeader>
@@ -184,8 +176,8 @@ export default function UserForm() {
             onSubmit={form.handleSubmit(handleSubmit)}
             className="flex flex-col flex-1 min-h-0"
           >
-            <div className="flex-1 overflow-y-auto px-1 space-y-4">
-              <div className="grid grid-cols-1 lg:grid-cols-3 items-center gap-6 mt-2">
+            <div className="flex-1 overflow-y-auto px-1 space-y-6">
+              <div className="grid grid-cols-2 lg:grid-cols-3 items-center gap-4 lg:gap-6 mt-2">
                 <FormField
                   name="name"
                   control={form.control}
@@ -253,7 +245,7 @@ export default function UserForm() {
                   )}
                 />
               </div>
-              <div className="grid grid-cols-1 lg:grid-cols-3 items-center gap-6 mt-2">
+              <div className="grid grid-cols-2 lg:grid-cols-4 items-center gap-4 lg:gap-6 mt-2">
                 <FormField
                   name="age"
                   control={form.control}
@@ -277,6 +269,7 @@ export default function UserForm() {
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   name="weight"
                   control={form.control}
@@ -305,6 +298,50 @@ export default function UserForm() {
                   name="height"
                   control={form.control}
                   render={({ field }) => (
+                    <FormItem className="hidden lg:block space-y-2">
+                      <FormLabel>Height (cm)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder="Enter your height"
+                          {...field}
+                          value={field.value || ""}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value === "" ? 0 : Number(e.target.value)
+                            )
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  name="joiningDate"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem className="hidden lg:block space-y-2">
+                      <FormLabel>Joining Date</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="date"
+                          placeholder="Enter your joining date"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="space-y-4 lg:hidden">
+                <FormField
+                  name="height"
+                  control={form.control}
+                  render={({ field }) => (
                     <FormItem>
                       <FormLabel>Height (cm)</FormLabel>
                       <FormControl>
@@ -324,9 +361,7 @@ export default function UserForm() {
                     </FormItem>
                   )}
                 />
-              </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-6 mt-2">
                 <FormField
                   name="joiningDate"
                   control={form.control}
@@ -346,10 +381,10 @@ export default function UserForm() {
                 />
               </div>
             </div>
-            <DialogFooter className="w-full flex !justify-center mt-6">
+            <DialogFooter className="w-full !flex !flex-row !justify-center mt-6">
               <Button
                 type="submit"
-                className="w-32 cursor-pointer"
+                className="w-32 cursor-pointer "
                 disabled={isPending}
               >
                 {isPending ? (

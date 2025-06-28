@@ -68,7 +68,7 @@ export function DashboardStats() {
   if (!stats) return null;
 
   return (
-    <div className="grid gap-4 d:grid-cols-2 lg:grid-cols-3 ">
+    <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 ">
       <StatCard
         title="Total Members"
         value={stats.totalMembers}

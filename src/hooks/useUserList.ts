@@ -51,10 +51,6 @@ export const useUserUpdate = () => {
     const query = useQueryClient();
     return useMutation({
         mutationFn: async (updatedUser: z.infer<typeof newMemberSchema> & { id: number }) => {
-
-
-            console.log("Updating user with data:", updatedUser);
-
             const response = await fetch(`/api/member/${updatedUser.id}`, {
                 method: "PUT",
                 headers: {

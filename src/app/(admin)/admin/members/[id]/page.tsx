@@ -39,9 +39,6 @@ export default function MemberPage() {
   const { setPaymentFormModal, setPlanHistoryDeleteModal } =
     useContext(modalContext);
 
-  console.log("MemberPage user data:", user);
-  console.log("Payment details:", paymentDetails);
-
   const handleAddPayment = () => {
     setPaymentFormModal({
       isOpen: true,

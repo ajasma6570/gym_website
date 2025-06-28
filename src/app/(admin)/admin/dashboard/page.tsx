@@ -12,13 +12,17 @@ export default function Page() {
       <div className="flex items-center justify-between space-y-2">
         <div>
           <h1 className="text-2xl font-bold">Dashboard</h1>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground hidden sm:block">
             View your gym statistics, including total members, active members,
             and more.
           </p>
         </div>
         <RefreshButton onRefresh={refetch} loading={loading} />
       </div>
+      <p className="text-muted-foreground  sm:hidden">
+        View your gym statistics, including total members, active members, and
+        more.
+      </p>
       <DashboardStats />
     </div>
   );

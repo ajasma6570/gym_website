@@ -133,7 +133,7 @@ export default function MembershipForm() {
       open={membershipFormModal.isOpen}
       onOpenChange={handleModalClose}
     >
-      <Dialog.DialogContent className="sm:max-w-3xl max-h-[90vh] flex flex-col">
+      <Dialog.DialogContent className="sm:max-w-3xl max-h-[90vh] flex flex-col overflow-y-auto">
         <Dialog.DialogHeader>
           <Dialog.DialogTitle>{dialogTitle}</Dialog.DialogTitle>
           <DialogDescription></DialogDescription>
@@ -271,7 +271,7 @@ export default function MembershipForm() {
                 />
               </div>
             </div>
-            <Dialog.DialogFooter className="w-full flex !justify-center mt-6">
+            <Dialog.DialogFooter className="w-full flex flex-row !justify-center mt-6">
               <Button
                 type="submit"
                 className="w-60 cursor-pointer"

@@ -774,7 +774,7 @@ export default function PaymentModal() {
               </div>
             </div>
 
-            <DialogFooter className="flex gap-2 mt-4">
+            <DialogFooter className="w-full flex flex-row !justify-center mt-6">
               {paymentError && (
                 <div className="text-red-600 text-sm mb-2">
                   {paymentError.message}
@@ -783,6 +783,7 @@ export default function PaymentModal() {
 
               <Button
                 type="submit"
+                className="w-48 cursor-pointer"
                 disabled={isPaymentPending || !form.formState.isValid}
               >
                 {isPaymentPending ? (

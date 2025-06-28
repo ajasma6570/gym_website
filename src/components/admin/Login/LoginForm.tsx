@@ -40,7 +40,7 @@ export function LoginForm({
         setGlobalError(result.message);
       }
     } catch (error) {
-      console.log("An unexpected error occurred. Please try again.", error);
+      console.error("An unexpected error occurred. Please try again.", error);
     }
   };
   return (

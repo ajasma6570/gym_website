@@ -27,9 +27,6 @@ export default function PaymentHistoryTable({
   );
 
   const getPlanTypeBadge = (payment: Payment) => {
-    console.log("Payment:", payment);
-    console.log("Plan histories:", planHistories);
-
     if (!planHistories || planHistories.length === 0) {
       return <span>No Plans Data</span>;
     }
@@ -133,7 +130,7 @@ export default function PaymentHistoryTable({
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader className="flex flex-col lg:flex-row gap-4 lg:gap-0 lg:items-center lg:justify-between">
         <CardTitle className="text-xl font-bold">Payment History</CardTitle>
         <div className="text-sm ">
           <div className="flex justify-between items-center text-sm gap-4">
