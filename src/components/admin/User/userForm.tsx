@@ -26,16 +26,19 @@ import { useUserCreate, useUserUpdate } from "@/hooks/useUserList";
 import modalContext from "@/context/ModalContext";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useRouter } from "next/navigation";
 
 type CreateFormData = z.infer<typeof newMemberSchema>;
 type FormData = CreateFormData & { id?: number };
 
 export default function UserForm() {
+  const router = useRouter();
   const {
     mutate: createUser,
     isSuccess: isCreateSuccess,
     isPending: isCreatePending,
     reset: resetCreate,
+    data: createdUserData,
   } = useUserCreate();
   const {
     mutate: updateUser,
@@ -156,9 +159,14 @@ export default function UserForm() {
       // Close modal automatically on success
       setTimeout(() => {
         handleModalClose();
+
+        // Navigate to user details page if this was a user creation
+        if (isCreateSuccess && createdUserData?.id) {
+          router.push(`/admin/members/${createdUserData.id}`);
+        }
       }, 500); // Small delay to show success state
     }
-  }, [isSuccess, handleModalClose]);
+  }, [isSuccess, isCreateSuccess, createdUserData, handleModalClose, router]);
 
   const dialogTitle =
     userFormModal.mode === "edit" ? "Edit Member" : "New Member";

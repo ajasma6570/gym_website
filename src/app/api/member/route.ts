@@ -25,7 +25,7 @@ export async function POST(req: Request) {
     });
 
     if (existingMember) {
-      return NextResponse.json({ error: "Member already exists" }, { status: 400 });
+      return NextResponse.json({ error: "Phone number already exists" }, { status: 400 });
     }
 
     const member = await prisma.member.create({

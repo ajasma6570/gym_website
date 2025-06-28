@@ -34,9 +34,11 @@ export const useUserCreate = () => {
 
             return response.json();
         },
-        onSuccess: () => {
+        onSuccess: (createdUser) => {
             showToastMessage("User created successfully!", "success");
             query.invalidateQueries({ queryKey: ["users"] });
+            // Return the created user data so components can access it
+            return createdUser;
         },
         onError: (error) => {
             console.error("Error creating user:", error);
