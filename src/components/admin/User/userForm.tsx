@@ -148,15 +148,9 @@ export default function UserForm() {
 
   useEffect(() => {
     if (isSuccess) {
-      // Close modal automatically on success
       setTimeout(() => {
         handleModalClose();
-
-        // Navigate to user details page if this was a user creation
-        if (isCreateSuccess && createdUserData?.id) {
-          router.push(`/admin/members/${createdUserData.id}`);
-        }
-      }, 500); // Small delay to show success state
+      }, 500);
     }
   }, [isSuccess, isCreateSuccess, createdUserData, handleModalClose, router]);
 
