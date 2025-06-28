@@ -290,7 +290,10 @@ export default function MemberPage() {
                       {(() => {
                         const latestFuturePlan =
                           paymentDetails.futurePlans.sort(
-                            (a: PlanHistory & { plan: Plan }, b: PlanHistory & { plan: Plan }) =>
+                            (
+                              a: PlanHistory & { plan: Plan },
+                              b: PlanHistory & { plan: Plan }
+                            ) =>
                               new Date(a.startDate).getTime() -
                               new Date(b.startDate).getTime()
                           )[0];
@@ -298,25 +301,25 @@ export default function MemberPage() {
                         return (
                           <div
                             key={latestFuturePlan.id}
-                            className="p-3  rounded-md"
+                            className="p-3 bg-background  rounded-md"
                           >
                             <div className="flex justify-between items-start">
                               <div>
-                                <p className="font-medium text-blue-800">
+                                <p className="font-medium text-white">
                                   {latestFuturePlan.plan?.name}
                                 </p>
-                                <p className="text-sm text-blue-600">
+                                <p className="text-base text-white">
                                   {latestFuturePlan.plan?.type ===
                                   "personal_training"
                                     ? "Personal Training"
                                     : "Membership"}
                                 </p>
-                                <p className="text-sm text-blue-600">
+                                <p className="text-sm text-white">
                                   ₹{latestFuturePlan.plan?.amount}
                                 </p>
                               </div>
                               <div className="text-right text-sm">
-                                <p className="text-blue-600">
+                                <p className="text-white">
                                   {format(
                                     new Date(latestFuturePlan.startDate),
                                     "dd MMM yyyy"
@@ -327,7 +330,7 @@ export default function MemberPage() {
                                     "dd MMM yyyy"
                                   )}
                                 </p>
-                                <p className="font-medium text-blue-700">
+                                <p className="font-medium text-green-700">
                                   Upcoming
                                 </p>
                               </div>
