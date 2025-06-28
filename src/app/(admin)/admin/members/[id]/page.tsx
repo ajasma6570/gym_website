@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { format } from "date-fns";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Loader2, CreditCard } from "lucide-react";
+import { Loader2, CreditCard, Trash2 } from "lucide-react";
 import { useContext } from "react";
 import modalContext from "@/context/ModalContext";
 import dynamic from "next/dynamic";
@@ -26,6 +26,9 @@ const PaymentModal = dynamic(
 const PaymentHistoryTable = dynamic(
   () => import("@/components/admin/Payment/PaymentHistoryTable")
 );
+const PlanHistoryDeleteModal = dynamic(
+  () => import("@/components/admin/PlanHistory/PlanHistoryDeleteModal")
+);
 
 export default function MemberPage() {
   const params = useParams();
@@ -33,7 +36,8 @@ export default function MemberPage() {
   const { data: user, isLoading } = useUserDetails(id);
   const { data: paymentDetails, isLoading: paymentDetailsLoading } =
     usePaymentDetails(id);
-  const { setPaymentFormModal } = useContext(modalContext);
+  const { setPaymentFormModal, setPlanHistoryDeleteModal } =
+    useContext(modalContext);
 
   console.log("MemberPage user data:", user);
   console.log("Payment details:", paymentDetails);
@@ -42,6 +46,19 @@ export default function MemberPage() {
     setPaymentFormModal({
       isOpen: true,
       memberData: user,
+    });
+  };
+
+  const handleDeletePlanHistory = (
+    planHistoryId: number,
+    planName: string,
+    planType: string
+  ) => {
+    setPlanHistoryDeleteModal({
+      isOpen: true,
+      planHistoryId,
+      planName,
+      planType,
     });
   };
 
@@ -202,6 +219,21 @@ export default function MemberPage() {
                                 <p className="font-medium text-green-700">
                                   Active
                                 </p>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="mt-2 text-red-500 hover:text-red-700 hover:bg-red-50"
+                                  onClick={() =>
+                                    handleDeletePlanHistory(
+                                      currentPlan.id,
+                                      currentPlan.plan?.name || "Unknown Plan",
+                                      "membership_plan"
+                                    )
+                                  }
+                                >
+                                  <Trash2 className="h-4 w-4 mr-1" />
+                                  Delete
+                                </Button>
                               </div>
                             </div>
                           </div>
@@ -278,6 +310,21 @@ export default function MemberPage() {
                                 <p className="font-medium text-green-700">
                                   Active
                                 </p>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="mt-2 text-red-500 hover:text-red-700 hover:bg-red-50"
+                                  onClick={() =>
+                                    handleDeletePlanHistory(
+                                      ptPlan.id,
+                                      ptPlan.plan?.name || "Unknown Plan",
+                                      "personal_training"
+                                    )
+                                  }
+                                >
+                                  <Trash2 className="h-4 w-4 mr-1" />
+                                  Delete
+                                </Button>
                               </div>
                             </div>
                           </div>
@@ -375,6 +422,22 @@ export default function MemberPage() {
                                 <p className="font-medium text-green-700">
                                   Upcoming
                                 </p>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="mt-2 text-red-500 hover:text-red-700 hover:bg-red-50"
+                                  onClick={() =>
+                                    handleDeletePlanHistory(
+                                      latestFuturePlan.id,
+                                      latestFuturePlan.plan?.name ||
+                                        "Unknown Plan",
+                                      "membership_plan"
+                                    )
+                                  }
+                                >
+                                  <Trash2 className="h-4 w-4 mr-1" />
+                                  Delete
+                                </Button>
                               </div>
                             </div>
                           </div>
@@ -465,6 +528,22 @@ export default function MemberPage() {
                                 <p className="font-medium text-green-700">
                                   Upcoming
                                 </p>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="mt-2 text-red-500 hover:text-red-700 hover:bg-red-50"
+                                  onClick={() =>
+                                    handleDeletePlanHistory(
+                                      latestFuturePTPlan.id,
+                                      latestFuturePTPlan.plan?.name ||
+                                        "Unknown Plan",
+                                      "personal_training"
+                                    )
+                                  }
+                                >
+                                  <Trash2 className="h-4 w-4 mr-1" />
+                                  Delete
+                                </Button>
                               </div>
                             </div>
                           </div>
@@ -492,6 +571,9 @@ export default function MemberPage() {
 
           {/* Payment Modal */}
           <PaymentModal />
+
+          {/* Plan History Delete Modal */}
+          <PlanHistoryDeleteModal />
         </div>
       )}
     </>

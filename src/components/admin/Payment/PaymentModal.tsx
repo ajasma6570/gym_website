@@ -223,9 +223,19 @@ export default function PaymentModal() {
 
   // Auto-update separate payment start dates when plans are selected
   useEffect(() => {
-    if (watchedPlanId && paymentFormModal.isOpen) {
-      const newStartDate = getMembershipPaymentStartDate();
-      form.setValue("membershipPaymentStart", newStartDate);
+    if (paymentFormModal.isOpen) {
+      if (watchedPlanId && watchedPlanId > 0) {
+        const newStartDate = getMembershipPaymentStartDate();
+        if (newStartDate !== form.getValues("membershipPaymentStart")) {
+          form.setValue("membershipPaymentStart", newStartDate);
+          form.trigger("membershipPaymentStart");
+        }
+      } else {
+        // Clear the date when no plan is selected
+        if (form.getValues("membershipPaymentStart") !== "") {
+          form.setValue("membershipPaymentStart", "");
+        }
+      }
     }
   }, [
     watchedPlanId,
@@ -235,9 +245,19 @@ export default function PaymentModal() {
   ]);
 
   useEffect(() => {
-    if (watchedPersonalTrainingId && paymentFormModal.isOpen) {
-      const newStartDate = getPersonalTrainingPaymentStartDate();
-      form.setValue("personalTrainingPaymentStart", newStartDate);
+    if (paymentFormModal.isOpen) {
+      if (watchedPersonalTrainingId && watchedPersonalTrainingId > 0) {
+        const newStartDate = getPersonalTrainingPaymentStartDate();
+        if (newStartDate !== form.getValues("personalTrainingPaymentStart")) {
+          form.setValue("personalTrainingPaymentStart", newStartDate);
+          form.trigger("personalTrainingPaymentStart");
+        }
+      } else {
+        // Clear the date when no plan is selected
+        if (form.getValues("personalTrainingPaymentStart") !== "") {
+          form.setValue("personalTrainingPaymentStart", "");
+        }
+      }
     }
   }, [
     watchedPersonalTrainingId,
@@ -274,10 +294,10 @@ export default function PaymentModal() {
         }
       }
 
-      if (earliestDate) {
+      if (earliestDate && earliestDate !== form.getValues("paymentStart")) {
         form.setValue("paymentStart", earliestDate);
         // Force revalidation when payment start date changes
-        form.trigger();
+        form.trigger("paymentStart");
       }
     }
   }, [
@@ -569,51 +589,56 @@ export default function PaymentModal() {
               </div>
 
               {/* Separate Start Date Fields */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Membership Payment Start Date */}
-                {watchedPlanId && watchedPlanId > 0 && (
-                  <FormField
-                    name="membershipPaymentStart"
-                    control={form.control}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Membership Payment Start Date</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="date"
-                            placeholder="Select membership start date"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
+              {((watchedPlanId && watchedPlanId > 0) || 
+                (watchedPersonalTrainingId && watchedPersonalTrainingId > 0)) && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Membership Payment Start Date */}
+                  {watchedPlanId && watchedPlanId > 0 && (
+                    <FormField
+                      name="membershipPaymentStart"
+                      control={form.control}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Membership Payment Start Date</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="date"
+                              placeholder="Select membership start date"
+                              {...field}
+                              value={field.value || ""}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
 
-                {/* Personal Training Payment Start Date */}
-                {watchedPersonalTrainingId && watchedPersonalTrainingId > 0 && (
-                  <FormField
-                    name="personalTrainingPaymentStart"
-                    control={form.control}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>
-                          Personal Training Payment Start Date
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            type="date"
-                            placeholder="Select PT start date"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-              </div>
+                  {/* Personal Training Payment Start Date */}
+                  {watchedPersonalTrainingId && watchedPersonalTrainingId > 0 && (
+                    <FormField
+                      name="personalTrainingPaymentStart"
+                      control={form.control}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            Personal Training Payment Start Date
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              type="date"
+                              placeholder="Select PT start date"
+                              {...field}
+                              value={field.value || ""}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
+                </div>
+              )}
 
               {/* Plan Selection Summary */}
               {((watchedPlanId && watchedPlanId > 0) ||
@@ -623,47 +648,69 @@ export default function PaymentModal() {
                   <h5 className="font-medium mb-2">Selected Plans Summary</h5>
                   <div className="space-y-2 text-sm">
                     {watchedPlanId && watchedPlanId > 0 && (
-                      <div className="flex justify-between">
-                        <span>
-                          <strong>Membership:</strong>{" "}
-                          {
-                            plans.find((p: Plan) => p.id === watchedPlanId)
-                              ?.name
-                          }
-                        </span>
-                        <span>
-                          ₹
-                          {
-                            plans.find((p: Plan) => p.id === watchedPlanId)
-                              ?.amount
-                          }
-                        </span>
-                      </div>
-                    )}
-                    {watchedPersonalTrainingId &&
-                      watchedPersonalTrainingId > 0 && (
+                      <div>
                         <div className="flex justify-between">
                           <span>
-                            <strong>Personal Training:</strong>{" "}
+                            <strong>Membership:</strong>{" "}
                             {
-                              plans.find(
-                                (p: Plan) => p.id === watchedPersonalTrainingId
-                              )?.name
+                              plans.find((p: Plan) => p.id === watchedPlanId)
+                                ?.name
                             }
                           </span>
                           <span>
                             ₹
                             {
-                              plans.find(
-                                (p: Plan) => p.id === watchedPersonalTrainingId
-                              )?.amount
+                              plans.find((p: Plan) => p.id === watchedPlanId)
+                                ?.amount
                             }
                           </span>
+                        </div>
+                        {watchedMembershipPaymentStart && (
+                          <div className="text-xs text-muted-foreground mt-1">
+                            Start Date:{" "}
+                            {new Date(
+                              watchedMembershipPaymentStart
+                            ).toLocaleDateString()}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    {watchedPersonalTrainingId &&
+                      watchedPersonalTrainingId > 0 && (
+                        <div>
+                          <div className="flex justify-between">
+                            <span>
+                              <strong>Personal Training:</strong>{" "}
+                              {
+                                plans.find(
+                                  (p: Plan) =>
+                                    p.id === watchedPersonalTrainingId
+                                )?.name
+                              }
+                            </span>
+                            <span>
+                              ₹
+                              {
+                                plans.find(
+                                  (p: Plan) =>
+                                    p.id === watchedPersonalTrainingId
+                                )?.amount
+                              }
+                            </span>
+                          </div>
+                          {watchedPersonalTrainingPaymentStart && (
+                            <div className="text-xs text-muted-foreground mt-1">
+                              Start Date:{" "}
+                              {new Date(
+                                watchedPersonalTrainingPaymentStart
+                              ).toLocaleDateString()}
+                            </div>
+                          )}
                         </div>
                       )}
                     <div className="border-t pt-2 flex justify-between font-medium">
                       <span>Total Amount:</span>
-                      <span>₹{form.watch("amount")}</span>
+                      <span>₹{form.watch("amount") || 0}</span>
                     </div>
                   </div>
                 </div>

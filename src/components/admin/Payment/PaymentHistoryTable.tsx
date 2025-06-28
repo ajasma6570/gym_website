@@ -142,7 +142,11 @@ export default function PaymentHistoryTable({
           </div>
           <div className="flex justify-between items-center text-sm mt-1 gap-4">
             <span className="">Total Amount Paid:</span>
-            <span className="font-semibold text-green-600 ml-auto">
+            <span
+              className={`font-semibold ml-auto ${
+                getTotalAmount() < 0 ? "text-red-600" : "text-green-600"
+              }`}
+            >
               ₹{getTotalAmount()}
             </span>
           </div>
@@ -169,7 +173,11 @@ export default function PaymentHistoryTable({
                     {format(new Date(payment.date), "dd MMM yyyy")}
                   </TableCell>
                   <TableCell>
-                    <span className="font-semibold text-green-600">
+                    <span
+                      className={`font-semibold ${
+                        payment.amount < 0 ? "text-red-600" : "text-green-600"
+                      }`}
+                    >
                       ₹ {payment.amount}
                     </span>
                   </TableCell>

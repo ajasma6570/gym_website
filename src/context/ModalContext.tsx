@@ -66,6 +66,20 @@ interface ModalContextType {
       memberData: any;
     }>
   >;
+  planHistoryDeleteModal: {
+    isOpen: boolean;
+    planHistoryId: number | null;
+    planName: string | null;
+    planType: string | null;
+  };
+  setPlanHistoryDeleteModal: React.Dispatch<
+    React.SetStateAction<{
+      isOpen: boolean;
+      planHistoryId: number | null;
+      planName: string | null;
+      planType: string | null;
+    }>
+  >;
 }
 
 const modalContext = createContext<ModalContextType>({
@@ -98,6 +112,13 @@ const modalContext = createContext<ModalContextType>({
     memberData: null,
   },
   setPaymentFormModal: () => {},
+  planHistoryDeleteModal: {
+    isOpen: false,
+    planHistoryId: null as number | null,
+    planName: null as string | null,
+    planType: null as string | null,
+  },
+  setPlanHistoryDeleteModal: () => {},
 });
 
 export const ModalProvider = ({ children }: ModalProviderProps) => {
@@ -130,6 +151,13 @@ export const ModalProvider = ({ children }: ModalProviderProps) => {
     memberData: null,
   });
 
+  const [planHistoryDeleteModal, setPlanHistoryDeleteModal] = useState({
+    isOpen: false,
+    planHistoryId: null as number | null,
+    planName: null as string | null,
+    planType: null as string | null,
+  });
+
   return (
     <modalContext.Provider
       value={{
@@ -143,6 +171,8 @@ export const ModalProvider = ({ children }: ModalProviderProps) => {
         setMembershipFormModal,
         paymentFormModal,
         setPaymentFormModal,
+        planHistoryDeleteModal,
+        setPlanHistoryDeleteModal,
       }}
     >
       {children}
