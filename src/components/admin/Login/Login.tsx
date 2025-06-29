@@ -11,7 +11,7 @@ export default function LoginPage() {
         <Image
           fill
           loading="lazy"
-          src={"/assets/cross-training-rope-swing-exercise.jpg"}
+          src={"/images/rope-swing.webp"}
           alt="Login page background"
           className="absolute inset-0 h-full w-full object-cover "
         />
