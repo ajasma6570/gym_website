@@ -69,10 +69,10 @@ const Header = () => {
           >
             <Link href="/" className="flex items-center space-x-2">
               <Image
-                src="/images/logo-bg-none.webp"
+                src="/images/logo.png"
                 alt="Logo"
-                width={isSmallScreen ? 150 : isScrolled ? 150 : 150}
-                height={isSmallScreen ? 100 : isScrolled ? 100 : 150}
+                width={isSmallScreen ? 80 : isScrolled ? 100 : 120}
+                height={isSmallScreen ? 80 : isScrolled ? 100 : 120}
               />
               {/* /<span
                 className={`text-2xl font-bold transition-colors duration-300 ${isScrolled ? "text-white" : "text-white"

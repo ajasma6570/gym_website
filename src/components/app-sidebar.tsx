@@ -64,10 +64,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           onClick={handleLinkClick}
         >
           <Image
-            src="/images/logo-bg-none.webp"
+            src="/images/logo.png"
             alt="Anatomy"
             width={80}
             height={80}
+            className="!h-14 !w-24 object-fill"
           />
         </Link>
       </SidebarHeader>
