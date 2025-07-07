@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useCallback, useContext } from "react";
+import React, { useEffect, useCallback, useContext, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -48,7 +48,11 @@ export default function PaymentModal() {
     isPending: isPaymentPending,
     isSuccess: isPaymentSuccess,
     error: paymentError,
+    reset: resetPaymentMutation,
   } = usePaymentCreate();
+
+  // Track if we've already handled the success to prevent auto-closing on modal reopen
+  const hasHandledSuccess = useRef(false);
 
   // Get payment details to check for active plans
   const { data: paymentDetails } = usePaymentDetails(
@@ -351,6 +355,13 @@ export default function PaymentModal() {
       isOpen: false,
       memberData: null,
     });
+
+    // Reset the payment mutation to clear success state
+    resetPaymentMutation();
+
+    // Reset the success tracking
+    hasHandledSuccess.current = false;
+
     const startDate = getPaymentStartDate();
     form.reset({
       planId: 0,
@@ -363,11 +374,18 @@ export default function PaymentModal() {
       paymentType: "cash",
       amount: 0,
     });
-  }, [setPaymentFormModal, form, getPaymentStartDate, isPaymentPending]);
+  }, [
+    setPaymentFormModal,
+    form,
+    getPaymentStartDate,
+    isPaymentPending,
+    resetPaymentMutation,
+  ]);
 
-  // Close modal on successful payment
+  // Close modal on successful payment - but only once
   useEffect(() => {
-    if (isPaymentSuccess) {
+    if (isPaymentSuccess && !hasHandledSuccess.current) {
+      hasHandledSuccess.current = true;
       setTimeout(() => {
         handleModalClose();
       }, 500); // Small delay to show success state
@@ -377,6 +395,12 @@ export default function PaymentModal() {
   // Reset form with appropriate date when modal opens
   useEffect(() => {
     if (paymentFormModal.isOpen) {
+      // Reset the payment mutation when modal opens to clear any previous state
+      resetPaymentMutation();
+
+      // Reset the success tracking when modal opens
+      hasHandledSuccess.current = false;
+
       const startDate = getPaymentStartDate();
       form.reset({
         planId: 0,
@@ -390,7 +414,12 @@ export default function PaymentModal() {
         amount: 0,
       });
     }
-  }, [paymentFormModal.isOpen, form, getPaymentStartDate]);
+  }, [
+    paymentFormModal.isOpen,
+    form,
+    getPaymentStartDate,
+    resetPaymentMutation,
+  ]);
 
   const handleSubmit = useCallback(
     async (values: PaymentFormData) => {
