@@ -11,6 +11,7 @@ import modalContext from "@/context/ModalContext";
 import dynamic from "next/dynamic";
 import { usePaymentDetails } from "@/hooks/usePayment";
 import { PlanHistory, Plan } from "@/types";
+import { hasBothFuturePlans } from "@/lib/utils";
 import {
   Card,
   CardContent,
@@ -46,6 +47,9 @@ export default function MemberPage() {
     });
   };
 
+  // Check if both future plans exist to disable Pay Now button
+  const shouldDisablePayNow = hasBothFuturePlans(paymentDetails);
+
   const handleDeletePlanHistory = (
     planHistoryId: number,
     planName: string,
@@ -77,6 +81,12 @@ export default function MemberPage() {
             <Button
               onClick={handleAddPayment}
               className="flex items-center gap-2"
+              disabled={shouldDisablePayNow}
+              title={
+                shouldDisablePayNow
+                  ? "Cannot add new plans - future membership and personal training plans already exist"
+                  : "Add payment for new plan"
+              }
             >
               <CreditCard className="h-4 w-4" />
               Pay Now

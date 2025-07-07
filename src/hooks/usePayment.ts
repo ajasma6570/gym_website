@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PaymentFormData } from "@/lib/validation/paymentSchema";
-import { PaymentMethod, PaymentDetailsResponse } from "@/types";
+import { PaymentMethod, PaymentDetailsResponse, PaymentPlanType } from "@/types";
 import { showToastMessage } from "@/lib/toast";
 
 interface PaymentRequest {
@@ -9,6 +9,7 @@ interface PaymentRequest {
     paymentStart: string;
     amount: number;
     paymentMethod?: PaymentMethod;
+    planType?: PaymentPlanType; // Use the proper enum type
 }
 
 interface PaymentResponse {
@@ -93,6 +94,19 @@ export const usePaymentCreate = () => {
 
 // Helper function to transform PaymentFormData to PaymentRequest
 export const transformPaymentFormData = (formData: PaymentFormData): PaymentRequest => {
+    // Determine plan type based on selected plans
+    let planType: PaymentPlanType | undefined;
+    const hasMembership = formData.planId && formData.planId > 0;
+    const hasPersonalTraining = formData.personalTrainingId && formData.personalTrainingId > 0;
+
+    if (hasMembership && hasPersonalTraining) {
+        planType = "both";
+    } else if (hasMembership) {
+        planType = "membership_plan";
+    } else if (hasPersonalTraining) {
+        planType = "personal_training";
+    }
+
     return {
         planId: formData.planId && formData.planId > 0 ? formData.planId : undefined,
         personalTrainingPlanId: formData.personalTrainingId && formData.personalTrainingId > 0
@@ -101,5 +115,6 @@ export const transformPaymentFormData = (formData: PaymentFormData): PaymentRequ
         paymentStart: formData.paymentStart,
         amount: formData.amount,
         paymentMethod: formData.paymentType as PaymentMethod,
+        planType: planType,
     };
 };

@@ -421,11 +421,56 @@ export default function PaymentModal() {
     resetPaymentMutation,
   ]);
 
+  // Function to check for existing future plans
+  const checkForExistingFuturePlans = useCallback(
+    (values: PaymentFormData) => {
+      if (!paymentDetails?.futurePlans) return null;
+
+      const hasMembership = values.planId && values.planId > 0;
+      const hasPersonalTraining =
+        values.personalTrainingId && values.personalTrainingId > 0;
+
+      // Check for future membership plans
+      if (hasMembership) {
+        const futureMembershipPlans = paymentDetails.futurePlans.filter(
+          (plan: PlanHistory & { plan: Plan }) =>
+            plan.plan.type === "membership_plan"
+        );
+
+        if (futureMembershipPlans.length > 0) {
+          return "You already have a future membership plan scheduled.";
+        }
+      }
+
+      // Check for future personal training plans
+      if (hasPersonalTraining) {
+        const futurePTPlans = paymentDetails.futurePlans.filter(
+          (plan: PlanHistory & { plan: Plan }) =>
+            plan.plan.type === "personal_training"
+        );
+
+        if (futurePTPlans.length > 0) {
+          return "You already have a future personal training plan scheduled.";
+        }
+      }
+
+      return null;
+    },
+    [paymentDetails]
+  );
+
   const handleSubmit = useCallback(
     async (values: PaymentFormData) => {
       try {
         if (!paymentFormModal.memberData?.id) {
           showToastMessage("No member data available for payment", "warning");
+          return;
+        }
+
+        // Check for existing future plans before submitting
+        const existingPlanError = checkForExistingFuturePlans(values);
+        if (existingPlanError) {
+          showToastMessage(existingPlanError, "warning");
           return;
         }
 
@@ -443,7 +488,7 @@ export default function PaymentModal() {
         );
       }
     },
-    [paymentFormModal.memberData, createPayment]
+    [paymentFormModal.memberData, createPayment, checkForExistingFuturePlans]
   );
 
   const member = paymentFormModal.memberData;

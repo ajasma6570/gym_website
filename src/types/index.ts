@@ -3,6 +3,7 @@ export type Gender = "male" | "female" | "other";
 export type PlanStatus = "active" | "inactive";
 export type PlanType = "membership_plan" | "personal_training";
 export type PaymentMethod = "cash" | "card" | "upi";
+export type PaymentPlanType = "membership_plan" | "personal_training" | "both";
 
 // Plan related types
 export interface Plan {
@@ -34,6 +35,7 @@ export interface Payment {
     amount: number;
     date: Date;
     paymentMethod: PaymentMethod;
+    planType?: PaymentPlanType;
 }
 
 // Member related types
@@ -265,6 +267,12 @@ export const PAYMENT_METHOD_OPTIONS: { value: PaymentMethod; label: string }[] =
     { value: "cash", label: "Cash" },
     { value: "card", label: "Card" },
     { value: "upi", label: "UPI" },
+];
+
+export const PAYMENT_PLAN_TYPE_OPTIONS: { value: PaymentPlanType; label: string }[] = [
+    { value: "membership_plan", label: "Membership Plan" },
+    { value: "personal_training", label: "Personal Training" },
+    { value: "both", label: "Both Plans" },
 ];
 
 // Utility type helpers

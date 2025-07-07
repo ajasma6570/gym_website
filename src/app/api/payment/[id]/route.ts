@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { addDays } from "date-fns";
-import { PaymentMethod } from "@prisma/client";
+import { PaymentMethod, PaymentPlanType } from "@prisma/client";
 
 interface PaymentBody {
   planId?: number;
@@ -9,6 +9,7 @@ interface PaymentBody {
   paymentStart: string;
   amount: number;
   paymentMethod?: PaymentMethod;
+  planType?: PaymentPlanType; // Use the proper enum type
 }
 
 
@@ -85,6 +86,7 @@ export async function POST(
       paymentStart,
       amount,
       paymentMethod,
+      planType: requestPlanType,
     } = body;
 
     // Validate that at least one plan is selected
@@ -96,6 +98,47 @@ export async function POST(
     }
 
     const startDate = new Date(paymentStart);
+
+    // Check for existing future plans that would overlap
+    const today = new Date();
+
+    if (planId) {
+      // Check for future membership plans
+      const futureMembershipPlans = await prisma.planHistory.findMany({
+        where: {
+          memberId,
+          plan: { type: "membership_plan" },
+          startDate: { gt: today },
+        },
+        orderBy: { startDate: "asc" },
+      });
+
+      if (futureMembershipPlans.length > 0) {
+        return NextResponse.json(
+          { error: "You already have a future membership plan scheduled." },
+          { status: 400 }
+        );
+      }
+    }
+
+    if (personalTrainingPlanId) {
+      // Check for future personal training plans
+      const futurePTPlans = await prisma.planHistory.findMany({
+        where: {
+          memberId,
+          plan: { type: "personal_training" },
+          startDate: { gt: today },
+        },
+        orderBy: { startDate: "asc" },
+      });
+
+      if (futurePTPlans.length > 0) {
+        return NextResponse.json(
+          { error: "You already have a future personal training plan scheduled." },
+          { status: 400 }
+        );
+      }
+    }
     let membershipPlanHistory = null;
     let personalTrainingPlanHistory = null;
 
@@ -196,13 +239,36 @@ export async function POST(
       });
     }
 
-    // 6. Record the payment
+    // 6. Determine plan type and record the payment
+    let planType: PaymentPlanType;
+
+    // Use planType from request (should always be provided from frontend)
+    if (requestPlanType) {
+      switch (requestPlanType) {
+        case "membership_plan":
+          planType = PaymentPlanType.membership_plan;
+          break;
+        case "personal_training":
+          planType = PaymentPlanType.personal_training;
+          break;
+        case "both":
+          planType = PaymentPlanType.both;
+          break;
+        default:
+          planType = PaymentPlanType.membership_plan;
+      }
+    } else {
+      // This shouldn't happen if frontend is working correctly, but provide a safe default
+      planType = PaymentPlanType.membership_plan;
+    }
+
     const payment = await prisma.payment.create({
       data: {
         memberId,
         amount,
         date: new Date(),
         paymentMethod: paymentMethod || "cash",
+        planType,
       },
     });
 

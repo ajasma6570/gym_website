@@ -51,12 +51,13 @@ model PlanHistory {
 }
 
 model Payment {
-  id            Int           @id @default(autoincrement())
+  id            Int              @id @default(autoincrement())
   memberId      Int
   amount        Float
-  date          DateTime      @default(now())
-  paymentMethod PaymentMethod @default(cash)
-  member        Member        @relation(fields: [memberId], references: [id])
+  date          DateTime         @default(now())
+  paymentMethod PaymentMethod    @default(cash)
+  planType      PaymentPlanType? @default(membership_plan)
+  member        Member           @relation(fields: [memberId], references: [id])
 }
 
 model Task {
@@ -83,6 +84,12 @@ enum PlanStatus {
 enum PlanType {
   membership_plan
   personal_training
+}
+
+enum PaymentPlanType {
+  membership_plan
+  personal_training
+  both
 }
 
 enum PaymentMethod {

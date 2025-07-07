@@ -27,11 +27,49 @@ export default function PaymentHistoryTable({
   );
 
   const getPlanTypeBadge = (payment: Payment) => {
+    // First, check if the payment has planType information (for new payments after the enum update)
+    if (payment.planType) {
+      switch (payment.planType) {
+        case "membership_plan":
+          return (
+            <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-md text-xs">
+              Membership
+            </span>
+          );
+        case "personal_training":
+          return (
+            <span className="px-2 py-1 bg-green-100 text-green-800 rounded-md text-xs">
+              Personal Training
+            </span>
+          );
+        case "both":
+          return (
+            <div className="flex gap-1 flex-wrap">
+              <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-md text-xs">
+                Membership
+              </span>
+              <span className="px-2 py-1 bg-green-100 text-green-800 rounded-md text-xs">
+                Personal Training
+              </span>
+            </div>
+          );
+        default:
+          break;
+      }
+    }
+
+    // Fallback logic for older payments without planType field
     if (!planHistories || planHistories.length === 0) {
-      return <span>No Plans Data</span>;
+      return (
+        <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded-md text-xs">
+          No Plans Data
+        </span>
+      );
     }
 
     const paymentDate = new Date(payment.date);
+
+    // Try to find plans created within 1 hour of payment
     const oneHourBefore = new Date(paymentDate.getTime() - 60 * 60 * 1000);
     const oneHourAfter = new Date(paymentDate.getTime() + 60 * 60 * 1000);
 
@@ -40,73 +78,66 @@ export default function PaymentHistoryTable({
       return planStartDate >= oneHourBefore && planStartDate <= oneHourAfter;
     });
 
+    // If not found, try same day with amount matching
     if (relatedPlans.length === 0) {
       const paymentDateOnly = paymentDate.toDateString();
-      relatedPlans = planHistories.filter((planHistory) => {
+      const sameDayPlans = planHistories.filter((planHistory) => {
         const planStartDate = new Date(planHistory.startDate);
         return planStartDate.toDateString() === paymentDateOnly;
       });
-    }
 
-    if (relatedPlans.length === 0) {
-      const sevenDaysBefore = new Date(
-        paymentDate.getTime() - 7 * 24 * 60 * 60 * 1000
-      );
-      const sevenDaysAfter = new Date(
-        paymentDate.getTime() + 7 * 24 * 60 * 60 * 1000
-      );
-      relatedPlans = planHistories.filter((planHistory) => {
-        const planStartDate = new Date(planHistory.startDate);
-        return (
-          planStartDate >= sevenDaysBefore && planStartDate <= sevenDaysAfter
-        );
+      // Look for exact amount match on same day
+      const exactAmountMatch = sameDayPlans.find((planHistory) => {
+        return planHistory.plan?.amount === payment.amount;
       });
-    }
 
-    if (relatedPlans.length === 0) {
-      const allMembershipPlans = planHistories.filter(
-        (plan) => plan.plan?.type === "membership_plan"
-      );
-      const allPersonalTrainingPlans = planHistories.filter(
-        (plan) => plan.plan?.type === "personal_training"
-      );
-
-      if (
-        allMembershipPlans.length > 0 &&
-        allPersonalTrainingPlans.length > 0
-      ) {
-        return <span>Both Plans</span>;
-      } else if (allMembershipPlans.length > 0) {
-        return <span>Membership</span>;
-      } else if (allPersonalTrainingPlans.length > 0) {
-        return <span> Personal Training</span>;
+      if (exactAmountMatch) {
+        relatedPlans = [exactAmountMatch];
       } else {
-        return <span>N/A</span>;
+        relatedPlans = sameDayPlans;
       }
     }
 
-    // Check what types of plans are included
-    const hasMembership = relatedPlans.some(
-      (plan) => plan.plan?.type === "membership_plan"
-    );
-    const hasPersonalTraining = relatedPlans.some(
-      (plan) => plan.plan?.type === "personal_training"
-    );
-
-    if (hasMembership && hasPersonalTraining) {
-      return (
-        <div className="flex gap-1 flex-wrap">
-          <span>Membership</span>
-          <span>Personal Training</span>
-        </div>
+    // If we found related plans, determine the types
+    if (relatedPlans.length > 0) {
+      const hasMembership = relatedPlans.some(
+        (plan) => plan.plan?.type === "membership_plan"
       );
-    } else if (hasPersonalTraining) {
-      return <span>Personal Training</span>;
-    } else if (hasMembership) {
-      return <span>Membership</span>;
-    } else {
-      return <span>N/A</span>;
+      const hasPersonalTraining = relatedPlans.some(
+        (plan) => plan.plan?.type === "personal_training"
+      );
+
+      if (hasMembership && hasPersonalTraining) {
+        return (
+          <div className="flex gap-1 flex-wrap">
+            <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-md text-xs">
+              Membership
+            </span>
+            <span className="px-2 py-1 bg-green-100 text-green-800 rounded-md text-xs">
+              Personal Training
+            </span>
+          </div>
+        );
+      } else if (hasPersonalTraining) {
+        return (
+          <span className="px-2 py-1 bg-green-100 text-green-800 rounded-md text-xs">
+            Personal Training
+          </span>
+        );
+      } else if (hasMembership) {
+        return (
+          <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-md text-xs">
+            Membership
+          </span>
+        );
+      }
     }
+
+    return (
+      <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded-md text-xs">
+        Unknown
+      </span>
+    );
   };
 
   const getTotalAmount = () => {

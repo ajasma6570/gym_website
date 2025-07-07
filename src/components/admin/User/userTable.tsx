@@ -41,6 +41,7 @@ import {
 import modalContext from "@/context/ModalContext";
 import Link from "next/link";
 import { Member } from "@/types";
+import { memberHasBothFuturePlans } from "@/lib/utils";
 
 type User = Member;
 
@@ -324,12 +325,14 @@ export default function Page({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem
-                onClick={() => handlePayNow(user)}
-                className="cursor-pointer "
-              >
-                Pay Now
-              </DropdownMenuItem>
+              {!memberHasBothFuturePlans(user) && (
+                <DropdownMenuItem
+                  onClick={() => handlePayNow(user)}
+                  className="cursor-pointer "
+                >
+                  Pay Now
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem
                 onClick={() =>
                   setUserFormModal({
