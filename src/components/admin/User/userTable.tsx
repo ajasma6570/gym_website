@@ -284,9 +284,9 @@ export default function Page({
 
         return (
           <div className={`${colorClass} font-medium text-sm`}>
-            <div className="capitalize text-xs text-neutral-600 mb-1">
+            {/* <div className="capitalize text-xs text-neutral-600 mb-1">
               {personalTrainingPlan.plan?.name}
-            </div>
+            </div> */}
             {message}
             <div className="text-sm text-neutral-500 mt-1">
               Due: {format(dueDate, "dd-MM-yyyy")}
